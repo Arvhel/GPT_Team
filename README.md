@@ -1,2 +1,2 @@
-# Taimteam
+# GPT Team
 Gpt team
