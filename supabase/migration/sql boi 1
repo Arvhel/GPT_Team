@@ -1,0 +1,23 @@
+
+ 
+CREATE TYPE public.user_role AS ENUM (
+    'superadmin',
+    'admin',
+    'hr_manager',
+    'sales_rep',
+    'crm_agent',
+    'product_manager',
+    'employee'
+);
+
+ 
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT NOT NULL UNIQUE,
+    full_name TEXT,
+    role public.user_role NOT NULL DEFAULT 'superadmin', -- Defaults to superadmin for dev per your instruction
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
