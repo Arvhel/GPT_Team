@@ -1,0 +1,1 @@
+console.log("HOPE, Inc. ERP System started successfully!");
