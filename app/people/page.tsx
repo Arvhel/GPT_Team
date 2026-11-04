@@ -234,7 +234,7 @@ export default function PeoplePage() {
         <div className="people-workspace"><span className="people-workspace-avatar">H</span><span><b>Hope Studio</b><small>Workspace</small></span><Icon name="down" /></div>
         <span className="people-sidebar-label">YOUR WORKSPACE</span>
         <nav className="people-nav" aria-label="Workspace navigation">
-          <a href="/#platform"><Icon name="grid" />Overview</a>
+          <a href="/dashboard"><Icon name="grid" />Overview</a>
           <a href="/products"><Icon name="box" />Products</a>
           <a className="active" href="/people" aria-current="page"><Icon name="people" />People<span className="people-nav-count">{employees.length}</span></a>
           <a href="/customers"><Icon name="chart" />Sales</a>

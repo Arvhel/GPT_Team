@@ -180,7 +180,7 @@ export default function CustomersPage() {
         <div className="customers-workspace"><span className="customers-workspace-avatar">H</span><span><b>Hope Studio</b><small>Workspace</small></span><Icon name="down" /></div>
         <span className="customers-sidebar-label">YOUR WORKSPACE</span>
         <nav className="customers-nav" aria-label="Workspace navigation">
-          <a href="/#platform"><Icon name="grid" />Overview</a>
+          <a href="/dashboard"><Icon name="grid" />Overview</a>
           <a href="/products"><Icon name="box" />Products</a>
           <a href="/people"><Icon name="people" />People</a>
           <a className="active" href="/customers" aria-current="page"><Icon name="chart" />Sales</a>
