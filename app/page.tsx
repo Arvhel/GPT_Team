@@ -9,6 +9,7 @@ const modules = [
     description: "Keep every launch moving, from first brief to final shipment.",
     icon: "box",
     color: "lavender",
+    href: "/products",
   },
   {
     number: "02",
@@ -16,6 +17,7 @@ const modules = [
     description: "Give your people a clearer view of their work and their growth.",
     icon: "people",
     color: "green",
+    href: "/people",
   },
   {
     number: "03",
@@ -23,6 +25,7 @@ const modules = [
     description: "Turn thoughtful conversations into a healthier sales pipeline.",
     icon: "chart",
     color: "peach",
+    href: "/customers",
   },
   {
     number: "04",
@@ -30,6 +33,7 @@ const modules = [
     description: "Bring every customer detail together in one considered place.",
     icon: "spark",
     color: "blue",
+    href: "/customers",
   },
 ] as const;
 
@@ -304,9 +308,9 @@ export default async function HomePage() {
               </div>
               <h3>{module.title}</h3>
               <p>{module.description}</p>
-              <a href="#about" aria-label={`Learn more about ${module.title}`}>
+              <Link href={module.href} aria-label={`Open ${module.title} dashboard`}>
                 <Icon name="arrow" />
-              </a>
+              </Link>
             </article>
           ))}
         </div>
