@@ -1,0 +1,68 @@
+
+
+CREATE TYPE public.user_role AS ENUM (
+    'superadmin',
+    'admin',
+    'hr_manager',
+    'sales_rep',
+    'crm_agent',
+    'product_manager',
+    'employee'
+);
+
+CREATE TABLE public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT NOT NULL UNIQUE,
+    full_name TEXT,
+    role public.user_role NOT NULL DEFAULT 'superadmin',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+SECURITY DEFINER SET search_path = ''
+AS $$
+BEGIN
+    INSERT INTO public.profiles (id, email, full_name, role)
+    VALUES (
+        NEW.id,
+        NEW.email,
+        COALESCE(NEW.raw_user_meta_data ->> 'full_name', 'Development User'),
+        'superadmin'
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+CREATE POLICY "Profiles are viewable by owners and superadmins"
+    ON public.profiles
+    FOR SELECT
+    USING (
+        auth.uid() = id
+        OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'superadmin'
+    );
+
+CREATE POLICY "Users can update own profile"
+    ON public.profiles
+    FOR UPDATE
+    USING (auth.uid() = id)
+    WITH CHECK (
+        auth.uid() = id
+        AND (
+
+            role = (SELECT role FROM public.profiles WHERE id = auth.uid())
+            OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'superadmin'
+        )
+    );
+
+CREATE POLICY "Superadmins have full control over profiles"
+    ON public.profiles
+    FOR ALL
+    USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'superadmin');

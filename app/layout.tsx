@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./hrm.css";
 
 export const metadata: Metadata = {
   title: "HOPE, Inc. | Account",

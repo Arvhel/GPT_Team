@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import { createClient } from "@/utils/supabase/server";
 
@@ -33,6 +34,11 @@ export default async function DashboardPage({
             Your password was updated.
           </p>
         )}
+        <p>
+          <Link className="forgot-password-link" href="/employees">
+            Open employee directory
+          </Link>
+        </p>
         <form action={logout}>
           <button type="submit">Log out</button>
         </form>
