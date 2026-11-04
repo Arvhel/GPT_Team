@@ -347,7 +347,7 @@ export default function Home() {
               <div className="module-card-top"><span className="module-icon"><Icon name={module.icon} /></span><span className="module-number">{module.number}</span></div>
               <h3>{module.title}</h3>
               <p>{module.description}</p>
-              <a href={module.number === "01" ? "/products" : module.number === "02" ? "/people" : "#about"} aria-label={module.number === "01" ? "Open product management" : module.number === "02" ? "Open people and culture" : `Learn more about ${module.title}`}><Icon name="arrow" /></a>
+              <a href={module.number === "01" ? "/products" : module.number === "02" ? "/people" : module.number === "03" || module.number === "04" ? "/customers" : "#about"} aria-label={module.number === "01" ? "Open product management" : module.number === "02" ? "Open people and culture" : module.number === "03" ? "Open sales dashboard" : module.number === "04" ? "Open customer management" : `Learn more about ${module.title}`}><Icon name="arrow" /></a>
             </article>
           ))}
         </div>

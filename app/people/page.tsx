@@ -237,8 +237,8 @@ export default function PeoplePage() {
           <a href="/#platform"><Icon name="grid" />Overview</a>
           <a href="/products"><Icon name="box" />Products</a>
           <a className="active" href="/people" aria-current="page"><Icon name="people" />People<span className="people-nav-count">{employees.length}</span></a>
-          <a href="/#modules"><Icon name="chart" />Sales</a>
-          <a href="/#modules"><Icon name="spark" />Customers</a>
+          <a href="/customers"><Icon name="chart" />Sales</a>
+          <a href="/customers"><Icon name="spark" />Customer management</a>
         </nav>
         <div className="people-sidebar-bottom">
           <div className="people-sidebar-note"><span>✳</span><b>People make it happen.</b><p>A healthier team starts with a little more clarity.</p></div>
