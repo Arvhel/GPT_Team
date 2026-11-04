@@ -1,7 +1,4 @@
--- =========================================================================
--- HOPE, INC. ERP — SALES MODULE
--- =========================================================================
-
+ 
  
 CREATE TYPE public.order_status AS ENUM ('pending', 'processing', 'completed', 'cancelled', 'refunded');
 CREATE TYPE public.payment_status AS ENUM ('unpaid', 'paid', 'partially_paid', 'failed', 'refunded');
