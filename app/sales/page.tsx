@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import "./sales.css";
+import "../dashboard/dashboard-theme.css";
 
 type SaleStatus = "Paid" | "Pending" | "Cancelled";
 

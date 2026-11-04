@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import "./products.css";
+import "../dashboard/dashboard-theme.css";
 
 type ProductStatus = "In stock" | "Low stock" | "Draft";
 type Product = {
