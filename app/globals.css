@@ -1,0 +1,157 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #17231d;
+  background: #f2f6f3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.auth-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+.auth-card {
+  width: min(100%, 28rem);
+  padding: 2.25rem;
+  border: 1px solid #dce7df;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1.25rem 3rem rgb(28 54 38 / 8%);
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: #31734b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+.intro {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.intro {
+  margin-bottom: 1.5rem;
+  color: #5b6b61;
+  line-height: 1.5;
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.auth-form label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-form input {
+  width: 100%;
+  margin-bottom: 0.4rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #bdcbc1;
+  border-radius: 0.5rem;
+}
+
+.auth-form input:focus {
+  border-color: #31734b;
+  outline: 3px solid rgb(49 115 75 / 15%);
+}
+
+button,
+.link-button {
+  display: inline-flex;
+  min-height: 2.8rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #31734b;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+button:hover,
+.link-button:hover {
+  background: #245c3a;
+}
+
+.form-actions {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.5rem;
+}
+
+.forgot-password-link,
+.back-link a {
+  color: #31734b;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.back-link {
+  margin: 1.5rem 0 0;
+  text-align: center;
+}
+
+.secondary-button {
+  background: #e8f1eb;
+  color: #245c3a;
+}
+
+.secondary-button:hover {
+  background: #dcebe0;
+}
+
+.form-message {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.form-error {
+  background: #fff0ed;
+  color: #8d2f21;
+}
+
+.form-notice {
+  background: #edf7ef;
+  color: #245c3a;
+}
