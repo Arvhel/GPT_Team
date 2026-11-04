@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 
 type AuthView = "login" | "register" | "forgot" | "reset";
 
@@ -154,10 +155,12 @@ function AuthDialog({
   view,
   setView,
   onClose,
+  onLogin,
 }: {
   view: AuthView;
   setView: (view: AuthView) => void;
   onClose: () => void;
+  onLogin: () => void;
 }) {
   const [status, setStatus] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -193,10 +196,12 @@ function AuthDialog({
     setIsSubmitting(true);
     timeoutRef.current = window.setTimeout(() => {
       setIsSubmitting(false);
+      if (view === "login") {
+        onLogin();
+        return;
+      }
       setStatus(
-        view === "login"
-          ? "We couldn’t sign you in because authentication isn’t connected in this preview."
-          : view === "register"
+        view === "register"
             ? "We couldn’t create your account because authentication isn’t connected in this preview."
             : view === "forgot"
               ? "We couldn’t send reset instructions because authentication isn’t connected in this preview."
@@ -234,6 +239,7 @@ function AuthDialog({
           <span className="eyebrow">{title.eyebrow}</span>
           <h2 id="auth-title">{title.title}</h2>
           <p className="auth-description">{title.detail}</p>
+          {view === "login" && <p className="demo-login-note">Demo mode: enter any valid email and password to open your workspace.</p>}
           <form className="auth-form" onSubmit={submitForm} aria-busy={isSubmitting}>
             {view === "register" && (
               <div className="field-row">
@@ -290,6 +296,7 @@ function AuthDialog({
 
 export default function Home() {
   const [authView, setAuthView] = useState<AuthView | null>(null);
+  const router = useRouter();
 
   return (
     <main>
@@ -340,7 +347,7 @@ export default function Home() {
               <div className="module-card-top"><span className="module-icon"><Icon name={module.icon} /></span><span className="module-number">{module.number}</span></div>
               <h3>{module.title}</h3>
               <p>{module.description}</p>
-              <a href={module.number === "01" ? "/products" : "#about"} aria-label={module.number === "01" ? "Open product management" : `Learn more about ${module.title}`}><Icon name="arrow" /></a>
+              <a href={module.number === "01" ? "/products" : module.number === "02" ? "/people" : "#about"} aria-label={module.number === "01" ? "Open product management" : module.number === "02" ? "Open people and culture" : `Learn more about ${module.title}`}><Icon name="arrow" /></a>
             </article>
           ))}
         </div>
@@ -378,7 +385,15 @@ export default function Home() {
         <div><a href="#privacy">Privacy</a><a href="#terms">Terms</a><button onClick={() => setAuthView("login")}>Sign in <Icon name="arrow" /></button></div>
       </footer>
 
-      {authView && <AuthDialog view={authView} setView={setAuthView} onClose={() => setAuthView(null)} />}
+      {authView && <AuthDialog
+        view={authView}
+        setView={setAuthView}
+        onClose={() => setAuthView(null)}
+        onLogin={() => {
+          setAuthView(null);
+          router.push("/people");
+        }}
+      />}
     </main>
   );
 }

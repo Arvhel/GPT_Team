@@ -208,6 +208,7 @@ h1, h2, h3, p { margin-top: 0; }
 .auth-content > .eyebrow { color: #aabd9c; font-size: 8px; }
 .auth-content h2 { margin: 10px 0 7px; color: #eff2e9; font-family: var(--serif); font-size: 33px; font-weight: 400; letter-spacing: -1px; }
 .auth-description { margin-bottom: 24px; color: #9ca69c; font-size: 11px; line-height: 1.6; }
+.demo-login-note { margin: -11px 0 18px; color: #b9cfaa; font-size: 9px; line-height: 1.55; }
 .auth-form { display: grid; gap: 14px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field { display: grid; gap: 7px; color: #c3ccc1; font-size: 9px; }

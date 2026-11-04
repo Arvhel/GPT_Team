@@ -196,7 +196,7 @@ export default function ProductsPage() {
         <nav className="products-nav" aria-label="Workspace navigation">
           <a href="/#platform"><Icon name="grid" />Overview</a>
           <a className="active" href="/products" aria-current="page"><Icon name="box" />Products<span className="nav-count">{products.length}</span></a>
-          <a href="/#modules"><Icon name="people" />People</a>
+          <a href="/people"><Icon name="people" />People</a>
           <a href="/#modules"><Icon name="chart" />Sales</a>
           <a href="/#modules"><Icon name="spark" />Customers</a>
         </nav>
