@@ -1,7 +1,4 @@
--- =========================================================================
--- HOPE, INC. ERP — CRM MODULE
--- =========================================================================
-
+ 
  
 CREATE TYPE public.customer_type AS ENUM ('lead', 'prospect', 'active_client', 'churned', 'partner');
 CREATE TYPE public.interaction_type AS ENUM ('call', 'email', 'meeting', 'demo', 'support_ticket', 'note');
