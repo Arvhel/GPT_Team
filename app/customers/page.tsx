@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import "./customers.css";
+import "../dashboard/dashboard-theme.css";
 
 type CustomerStatus = "Active" | "Prospect" | "At risk";
 type Customer = {

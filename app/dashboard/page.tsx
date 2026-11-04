@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import { createClient } from "@/utils/supabase/server";
+import "./dashboard-theme.css";
 
 type DashboardPageProps = {
   searchParams: Promise<{
@@ -24,8 +25,8 @@ export default async function DashboardPage({
   }
 
   return (
-    <main className="auth-page">
-      <section className="auth-card" aria-labelledby="dashboard-title">
+    <main className="dashboard-overview">
+      <section className="dashboard-overview-card" aria-labelledby="dashboard-title">
         <p className="eyebrow">HOPE, Inc.</p>
         <h1 id="dashboard-title">Dashboard</h1>
         <p className="intro">Signed in as {data.user.email}.</p>

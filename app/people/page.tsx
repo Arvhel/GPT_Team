@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import "./people.css";
+import "../dashboard/dashboard-theme.css";
 
 type EmployeeStatus = "Full time" | "Part time" | "On leave";
 type Employee = {
