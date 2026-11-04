@@ -183,8 +183,8 @@ export default function CustomersPage() {
           <a href="/dashboard"><Icon name="grid" />Overview</a>
           <a href="/products"><Icon name="box" />Products</a>
           <a href="/people"><Icon name="people" />People</a>
-          <a className="active" href="/customers" aria-current="page"><Icon name="chart" />Sales</a>
-          <a className="customer-nav-child active-child" href="/customers"><Icon name="sparkle" />Customer management<span>{customers.length}</span></a>
+          <a href="/sales"><Icon name="chart" />Sales</a>
+          <a className="customer-nav-child active-child" href="/customers" aria-current="page"><Icon name="sparkle" />Customer management<span>{customers.length}</span></a>
         </nav>
         <div className="customers-sidebar-bottom">
           <div className="customers-side-note"><span>✳</span><b>Every good thing starts with a connection.</b><p>Keep the details close. Make the follow-through feel personal.</p></div>
@@ -195,7 +195,7 @@ export default function CustomersPage() {
 
       <section className="customers-main">
         <header className="customers-topbar">
-          <div className="customers-breadcrumb"><span>Workspace</span><i>/</i><span>Sales</span><i>/</i><b>Customer management</b></div>
+          <div className="customers-breadcrumb"><span>Workspace</span><i>/</i><b>Customer management</b></div>
           <div className="customers-topbar-right"><span>RELATIONSHIPS, NOT JUST RECORDS</span><span className="customers-topbar-avatar">A</span></div>
         </header>
 

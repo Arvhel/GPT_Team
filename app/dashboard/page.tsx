@@ -45,8 +45,13 @@ export default async function DashboardPage({
             <strong>Customer management</strong>
             <small>Customer relationships, search, and account details</small>
           </Link>
-          <Link href="/products">
+          <Link href="/sales">
             <span>03</span>
+            <strong>Sales management</strong>
+            <small>Sales activity, orders, and transaction records</small>
+          </Link>
+          <Link href="/products">
+            <span>04</span>
             <strong>Product management</strong>
             <small>Products, inventory, and product details</small>
           </Link>
