@@ -1,6 +1,4 @@
--- =========================================================================
--- HOPE, INC. ERP — HUMAN RESOURCES MODULE
--- =========================================================================
+ 
 
  
 CREATE TYPE public.employment_type AS ENUM ('full_time', 'part_time', 'contractor', 'intern');
