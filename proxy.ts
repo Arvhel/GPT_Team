@@ -21,13 +21,15 @@ function redirectWithCookies(url: URL, response: NextResponse) {
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!supabaseUrl || !supabaseKey) {
     throw new Error("Missing Supabase environment variables.");
   }
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -54,13 +56,13 @@ export async function proxy(request: NextRequest) {
 
     if (error) {
       return redirectWithCookies(
-        new URL("/?auth=forgot&error=invalid-reset-link", request.url),
+        new URL("/forgot-password?error=invalid-reset-link", request.url),
         supabaseResponse,
       );
     }
 
     return redirectWithCookies(
-      new URL("/?auth=reset", request.url),
+      new URL("/reset-password", request.url),
       supabaseResponse,
     );
   }
@@ -80,7 +82,7 @@ export async function proxy(request: NextRequest) {
 
   if (isDashboardRoute && !user) {
     return redirectWithCookies(
-      new URL("/?auth=login", request.url),
+      new URL("/login", request.url),
       supabaseResponse,
     );
   }
@@ -94,7 +96,7 @@ export async function proxy(request: NextRequest) {
 
   if (pathname === "/reset-password" && !user) {
     return redirectWithCookies(
-      new URL("/?auth=reset&error=reset-session-missing", request.url),
+      new URL("/login?error=reset-session-missing", request.url),
       supabaseResponse,
     );
   }
