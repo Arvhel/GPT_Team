@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HOPE, Inc. | Account",
-  description: "Sign in to your HOPE, Inc. account.",
+  title: "Hope, Inc. — A little more in sync",
+  description:
+    "A considered workspace for products, people, sales, and customer relationships.",
 };
 
 export default function RootLayout({
@@ -13,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }

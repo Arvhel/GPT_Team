@@ -1,0 +1,95 @@
+ 
+ 
+CREATE TYPE public.order_status AS ENUM ('pending', 'processing', 'completed', 'cancelled', 'refunded');
+CREATE TYPE public.payment_status AS ENUM ('unpaid', 'paid', 'partially_paid', 'failed', 'refunded');
+CREATE TYPE public.payment_method AS ENUM ('credit_card', 'bank_transfer', 'cash', 'paypal', 'stripe');
+
+ 
+CREATE TABLE public.sales_orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_number TEXT NOT NULL UNIQUE,
+    customer_id UUID NOT NULL, -- Will reference CRM customers table
+    sales_rep_id UUID REFERENCES public.employees(id) ON DELETE SET NULL,
+    status public.order_status NOT NULL DEFAULT 'pending',
+    payment_status public.payment_status NOT NULL DEFAULT 'unpaid',
+    subtotal NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+    tax_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+    discount_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+    total_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+ 
+CREATE TABLE public.sales_order_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID NOT NULL REFERENCES public.sales_orders(id) ON DELETE CASCADE,
+    product_id UUID NOT NULL, -- Will reference Products table
+    quantity INT NOT NULL CHECK (quantity > 0),
+    unit_price NUMERIC(12, 2) NOT NULL,
+    total_price NUMERIC(12, 2) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+ 
+CREATE TABLE public.sales_transactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID NOT NULL REFERENCES public.sales_orders(id) ON DELETE CASCADE,
+    amount NUMERIC(12, 2) NOT NULL,
+    payment_method public.payment_method NOT NULL,
+    payment_status public.payment_status NOT NULL DEFAULT 'paid',
+    transaction_reference TEXT,
+    processed_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+ 
+CREATE INDEX idx_sales_orders_customer ON public.sales_orders(customer_id);
+CREATE INDEX idx_sales_orders_rep ON public.sales_orders(sales_rep_id);
+CREATE INDEX idx_order_items_order ON public.sales_order_items(order_id);
+CREATE INDEX idx_transactions_order ON public.sales_transactions(order_id);
+
+ 
+ALTER TABLE public.sales_orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sales_order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sales_transactions ENABLE ROW LEVEL SECURITY;
+
+ 
+CREATE OR REPLACE FUNCTION public.is_sales_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM public.profiles 
+        WHERE id = auth.uid() 
+        AND role IN ('superadmin', 'admin', 'sales_rep')
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+ 
+CREATE POLICY "Sales orders viewable by sales team and superadmins"
+    ON public.sales_orders FOR SELECT
+    USING (public.is_sales_admin());
+
+CREATE POLICY "Sales orders manageable by sales reps and admins"
+    ON public.sales_orders FOR ALL
+    USING (public.is_sales_admin());
+
+ 
+CREATE POLICY "Order items viewable by sales team"
+    ON public.sales_order_items FOR SELECT
+    USING (public.is_sales_admin());
+
+CREATE POLICY "Order items manageable by sales team"
+    ON public.sales_order_items FOR ALL
+    USING (public.is_sales_admin());
+
+ 
+CREATE POLICY "Transactions viewable by sales team"
+    ON public.sales_transactions FOR SELECT
+    USING (public.is_sales_admin());
+
+CREATE POLICY "Transactions manageable by sales team"
+    ON public.sales_transactions FOR ALL
+    USING (public.is_sales_admin());
