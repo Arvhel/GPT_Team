@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import { createClient } from "@/utils/supabase/server";
 
@@ -33,6 +34,23 @@ export default async function DashboardPage({
             Your password was updated.
           </p>
         )}
+        <nav className="dashboard-workspaces" aria-label="Hope workspaces">
+          <Link href="/people">
+            <span>01</span>
+            <strong>People &amp; culture</strong>
+            <small>HR dashboard, employee profiles, and departments</small>
+          </Link>
+          <Link href="/customers">
+            <span>02</span>
+            <strong>Customer management</strong>
+            <small>Customer relationships, search, and account details</small>
+          </Link>
+          <Link href="/products">
+            <span>03</span>
+            <strong>Product management</strong>
+            <small>Products, inventory, and product details</small>
+          </Link>
+        </nav>
         <form action={logout}>
           <button type="submit">Log out</button>
         </form>

@@ -194,11 +194,11 @@ export default function ProductsPage() {
         <div className="sidebar-workspace"><span className="workspace-avatar">H</span><span><b>Hope Studio</b><small>Workspace</small></span><Icon name="down" /></div>
         <span className="sidebar-label">YOUR WORKSPACE</span>
         <nav className="products-nav" aria-label="Workspace navigation">
-          <a href="/#platform"><Icon name="grid" />Overview</a>
+          <a href="/dashboard"><Icon name="grid" />Overview</a>
           <a className="active" href="/products" aria-current="page"><Icon name="box" />Products<span className="nav-count">{products.length}</span></a>
-          <a href="/#modules"><Icon name="people" />People</a>
-          <a href="/#modules"><Icon name="chart" />Sales</a>
-          <a href="/#modules"><Icon name="spark" />Customers</a>
+          <a href="/people"><Icon name="people" />People</a>
+          <a href="/customers"><Icon name="chart" />Sales</a>
+          <a href="/customers"><Icon name="spark" />Customer management</a>
         </nav>
         <div className="sidebar-bottom">
           <div className="sidebar-note"><span>✳</span><b>Good work grows here.</b><p>A little more clarity, for the whole team.</p></div>
