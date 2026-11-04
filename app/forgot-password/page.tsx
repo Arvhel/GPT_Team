@@ -23,6 +23,9 @@ export default async function ForgotPasswordPage({
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="forgot-password-title">
+        <Link className="auth-home-link" href="/">
+          ← Back to Hope home
+        </Link>
         <p className="eyebrow">HOPE, Inc.</p>
         <h1 id="forgot-password-title">Forgot password?</h1>
         <p className="intro">

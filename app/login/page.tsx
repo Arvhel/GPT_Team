@@ -26,6 +26,9 @@ function AuthForms() {
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="auth-title">
+        <Link className="auth-home-link" href="/">
+          ← Back to Hope home
+        </Link>
         <p className="eyebrow">HOPE, Inc.</p>
         <h1 id="auth-title">Welcome</h1>
         <p className="intro">Sign in or create an account to continue.</p>

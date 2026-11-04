@@ -1,4 +1,5 @@
 import { updatePassword } from "@/app/actions/auth";
+import Link from "next/link";
 
 type ResetPasswordPageProps = {
   searchParams: Promise<{
@@ -19,6 +20,9 @@ export default async function ResetPasswordPage({
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="reset-password-title">
+        <Link className="auth-home-link" href="/">
+          ← Back to Hope home
+        </Link>
         <p className="eyebrow">HOPE, Inc.</p>
         <h1 id="reset-password-title">Choose a new password</h1>
         <p className="intro">Use at least 8 characters for your new password.</p>
