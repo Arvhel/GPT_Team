@@ -26,7 +26,7 @@ const modules = [
     description: "Turn thoughtful conversations into a healthier sales pipeline.",
     icon: "chart",
     color: "peach",
-    href: "/customers",
+    href: "/sales",
   },
   {
     number: "04",

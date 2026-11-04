@@ -237,7 +237,7 @@ export default function PeoplePage() {
           <a href="/dashboard"><Icon name="grid" />Overview</a>
           <a href="/products"><Icon name="box" />Products</a>
           <a className="active" href="/people" aria-current="page"><Icon name="people" />People<span className="people-nav-count">{employees.length}</span></a>
-          <a href="/customers"><Icon name="chart" />Sales</a>
+          <a href="/sales"><Icon name="chart" />Sales</a>
           <a href="/customers"><Icon name="spark" />Customer management</a>
         </nav>
         <div className="people-sidebar-bottom">

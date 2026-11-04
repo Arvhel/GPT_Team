@@ -197,7 +197,7 @@ export default function ProductsPage() {
           <a href="/dashboard"><Icon name="grid" />Overview</a>
           <a className="active" href="/products" aria-current="page"><Icon name="box" />Products<span className="nav-count">{products.length}</span></a>
           <a href="/people"><Icon name="people" />People</a>
-          <a href="/customers"><Icon name="chart" />Sales</a>
+          <a href="/sales"><Icon name="chart" />Sales</a>
           <a href="/customers"><Icon name="spark" />Customer management</a>
         </nav>
         <div className="sidebar-bottom">
