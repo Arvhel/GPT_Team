@@ -139,7 +139,7 @@ function DashboardPreview() {
           </div>
         </div>
         <div className="preview-bottom">
-          <div className="task-heading"><span>Moving along</span><span>View all <Icon name="arrow" /></span></div>
+          <div className="task-heading"><span>Moving along</span><a href="/products">View products <Icon name="arrow" /></a></div>
           <div className="task-row"><span className="task-check">✓</span><span>Q4 product launch</span><small>Product</small><b>On track</b></div>
           <div className="task-row"><span className="task-check task-empty" /><span>Northstar renewal</span><small>Customer</small><b className="task-review">In review</b></div>
         </div>
@@ -340,7 +340,7 @@ export default function Home() {
               <div className="module-card-top"><span className="module-icon"><Icon name={module.icon} /></span><span className="module-number">{module.number}</span></div>
               <h3>{module.title}</h3>
               <p>{module.description}</p>
-              <a href="#about" aria-label={`Learn more about ${module.title}`}><Icon name="arrow" /></a>
+              <a href={module.number === "01" ? "/products" : "#about"} aria-label={module.number === "01" ? "Open product management" : `Learn more about ${module.title}`}><Icon name="arrow" /></a>
             </article>
           ))}
         </div>

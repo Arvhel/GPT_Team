@@ -107,6 +107,8 @@ h1, h2, h3, p { margin-top: 0; }
 .preview-bottom { margin-top: 18px; }
 .task-heading { margin-bottom: 10px; color: #d8ded5; font-size: 9px; }
 .task-heading > span:last-child { display: flex; align-items: center; gap: 4px; color: #96a392; font-size: 7px; }
+.task-heading > a { display: flex; align-items: center; gap: 4px; color: #96a392; font-size: 7px; }
+.task-heading > a:hover { color: var(--moss); }
 .task-heading .icon { width: 11px; height: 11px; }
 .task-row { min-height: 30px; gap: 7px; border-top: 1px solid rgba(235,241,229,.07); color: #c5cdc3; font-size: 8px; }
 .task-check { width: 12px; height: 12px; display: grid; place-items: center; border-radius: 3px; background: #516348; color: #d4e7c2; font-size: 8px; }
