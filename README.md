@@ -12,5 +12,4 @@ Install Node.js, then from this folder run:
 npm install
 npm run dev
 ```
-Open the local URL printed by Next.js. The authentication forms are UI previews only; they are not connected to an authentication service yet.
-Open the local URL printed by Next.js. The authentication forms are UI previews only; they are not connected to an authentication service yet.
+Open the local URL printed by Next.js. The authentication forms are UI previews only; they include browser form validation, a password-match check, loading indicators, and unavailable-service error states, but are not connected to an authentication service.

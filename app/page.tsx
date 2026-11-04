@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 type AuthView = "login" | "register" | "forgot" | "reset";
 
@@ -159,7 +159,17 @@ function AuthDialog({
   setView: (view: AuthView) => void;
   onClose: () => void;
 }) {
-  const [notice, setNotice] = useState("");
+  const [status, setStatus] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const timeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setStatus("");
+    setIsSubmitting(false);
+    return () => {
+      if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
+    };
+  }, [view]);
 
   const titles: Record<AuthView, { eyebrow: string; title: string; detail: string }> = {
     login: { eyebrow: "WELCOME BACK", title: "Good to see you.", detail: "Sign in to pick up right where you left off." },
@@ -171,23 +181,29 @@ function AuthDialog({
   function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+    setStatus("");
     if (
       view === "reset" &&
       formData.get("newPassword") !== formData.get("confirmPassword")
     ) {
-      setNotice("Those passwords don’t match. Please try again.");
+      setStatus("Those passwords don’t match. Please try again.");
       return;
     }
 
-    setNotice(
-      view === "login"
-        ? "Sign-in isn’t connected in this preview yet."
-        : view === "register"
-          ? "Account creation isn’t connected in this preview yet."
-          : view === "forgot"
-            ? "Password reset emails aren’t connected in this preview yet."
-            : "Password updates aren’t connected in this preview yet.",
-    );
+    setIsSubmitting(true);
+    timeoutRef.current = window.setTimeout(() => {
+      setIsSubmitting(false);
+      setStatus(
+        view === "login"
+          ? "We couldn’t sign you in because authentication isn’t connected in this preview."
+          : view === "register"
+            ? "We couldn’t create your account because authentication isn’t connected in this preview."
+            : view === "forgot"
+              ? "We couldn’t send reset instructions because authentication isn’t connected in this preview."
+              : "We couldn’t update your password because authentication isn’t connected in this preview.",
+      );
+      timeoutRef.current = null;
+    }, 650);
   }
 
   const title = titles[view];
@@ -218,47 +234,51 @@ function AuthDialog({
           <span className="eyebrow">{title.eyebrow}</span>
           <h2 id="auth-title">{title.title}</h2>
           <p className="auth-description">{title.detail}</p>
-          <form className="auth-form" onSubmit={submitForm}>
+          <form className="auth-form" onSubmit={submitForm} aria-busy={isSubmitting}>
             {view === "register" && (
               <div className="field-row">
-                <label className="field">First name<input autoComplete="given-name" name="firstName" placeholder="Alex" required /></label>
-                <label className="field">Last name<input autoComplete="family-name" name="lastName" placeholder="Morgan" required /></label>
+                <label className="field">First name<input autoComplete="given-name" name="firstName" placeholder="Alex" required disabled={isSubmitting} /></label>
+                <label className="field">Last name<input autoComplete="family-name" name="lastName" placeholder="Morgan" required disabled={isSubmitting} /></label>
               </div>
             )}
             {view === "register" && (
-              <label className="field">Company name<input autoComplete="organization" name="company" placeholder="Your company" required /></label>
+              <label className="field">Company name<input autoComplete="organization" name="company" placeholder="Your company" required disabled={isSubmitting} /></label>
             )}
             {(view === "login" || view === "register" || view === "forgot") && (
-              <label className="field">Work email<input autoComplete="email" name="email" placeholder="you@company.com" type="email" required /></label>
+              <label className="field">Work email<input autoComplete="email" name="email" placeholder="you@company.com" type="email" required disabled={isSubmitting} /></label>
             )}
             {(view === "login" || view === "register") && (
-              <label className="field">Password<input autoComplete={view === "login" ? "current-password" : "new-password"} minLength={8} name="password" placeholder="At least 8 characters" type="password" required /></label>
+              <label className="field">Password<input autoComplete={view === "login" ? "current-password" : "new-password"} minLength={8} name="password" placeholder="At least 8 characters" type="password" required disabled={isSubmitting} /><span className="field-hint">Use at least 8 characters.</span></label>
             )}
             {view === "reset" && (
               <>
-                <label className="field">Reset code<input autoComplete="one-time-code" name="resetCode" placeholder="Enter your reset code" required /></label>
-                <label className="field">New password<input autoComplete="new-password" minLength={8} name="newPassword" placeholder="At least 8 characters" type="password" required /></label>
-                <label className="field">Confirm new password<input autoComplete="new-password" minLength={8} name="confirmPassword" placeholder="Enter your new password again" type="password" required /></label>
+                <label className="field">Reset code<input autoComplete="one-time-code" name="resetCode" placeholder="Enter your reset code" required disabled={isSubmitting} /></label>
+                <label className="field">New password<input autoComplete="new-password" minLength={8} name="newPassword" placeholder="At least 8 characters" type="password" required disabled={isSubmitting} /><span className="field-hint">Use at least 8 characters.</span></label>
+                <label className="field">Confirm new password<input autoComplete="new-password" minLength={8} name="confirmPassword" placeholder="Enter your new password again" type="password" required disabled={isSubmitting} /></label>
               </>
             )}
             {view === "login" && (
-              <button className="text-link forgot-link" type="button" onClick={() => { setNotice(""); setView("forgot"); }}>Forgot password?</button>
+              <button className="text-link forgot-link" type="button" onClick={() => setView("forgot")} disabled={isSubmitting}>Forgot password?</button>
             )}
-            <button className="button button-primary auth-submit" type="submit">
-              {view === "login" ? "Sign in" : view === "register" ? "Create your account" : view === "forgot" ? "Send reset instructions" : "Set new password"}
-              <Icon name="arrow" />
+            <button className="button button-primary auth-submit" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <><span className="button-spinner" aria-hidden="true" />Checking…</>
+              ) : (
+                <>{view === "login" ? "Sign in" : view === "register" ? "Create your account" : view === "forgot" ? "Send reset instructions" : "Set new password"}<Icon name="arrow" /></>
+              )}
             </button>
-            {notice && <p className="form-notice" role="status">{notice}</p>}
+            {isSubmitting && <p className="form-loading" role="status">Checking your details…</p>}
+            {status && <p className="form-notice form-notice-error" role="alert">{status}</p>}
           </form>
           <div className="auth-switch">
             {view === "login" ? (
-              <>New to Hope? <button className="text-link" type="button" onClick={() => { setNotice(""); setView("register"); }}>Create an account</button></>
+              <>New to Hope? <button className="text-link" type="button" onClick={() => setView("register")} disabled={isSubmitting}>Create an account</button></>
             ) : view === "register" ? (
-              <>Already have an account? <button className="text-link" type="button" onClick={() => { setNotice(""); setView("login"); }}>Sign in</button></>
+              <>Already have an account? <button className="text-link" type="button" onClick={() => setView("login")} disabled={isSubmitting}>Sign in</button></>
             ) : view === "forgot" ? (
-              <><button className="text-link" type="button" onClick={() => { setNotice(""); setView("login"); }}>Back to sign in</button><span>·</span><button className="text-link" type="button" onClick={() => { setNotice(""); setView("reset"); }}>I have a reset code</button></>
+              <><button className="text-link" type="button" onClick={() => setView("login")} disabled={isSubmitting}>Back to sign in</button><span>·</span><button className="text-link" type="button" onClick={() => setView("reset")} disabled={isSubmitting}>I have a reset code</button></>
             ) : (
-              <button className="text-link" type="button" onClick={() => { setNotice(""); setView("login"); }}>Back to sign in</button>
+              <button className="text-link" type="button" onClick={() => setView("login")} disabled={isSubmitting}>Back to sign in</button>
             )}
           </div>
           <p className="auth-legal">By continuing, you agree to our <a href="#terms">Terms</a> and <a href="#privacy">Privacy Policy</a>.</p>

@@ -187,7 +187,7 @@ h1, h2, h3, p { margin-top: 0; }
 .site-footer > div button .icon { width: 12px; height: 12px; color: var(--moss); }
 
 .dialog-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; overflow-y: auto; padding: 24px; background: rgba(5, 8, 6, .78); backdrop-filter: blur(7px); animation: fade-in .18s ease-out; }
-.auth-dialog { width: min(850px, 100%); min-height: 510px; position: relative; display: grid; grid-template-columns: .78fr 1fr; overflow: hidden; border: 1px solid rgba(236,243,231,.15); border-radius: 7px; background: #171e19; box-shadow: 0 30px 100px rgba(0,0,0,.45); animation: rise-in .24s ease-out; }
+.auth-dialog { width: min(850px, 100%); max-height: calc(100vh - 48px); min-height: 510px; position: relative; display: grid; grid-template-columns: .78fr 1fr; overflow-x: hidden; overflow-y: auto; border: 1px solid rgba(236,243,231,.15); border-radius: 7px; background: #171e19; box-shadow: 0 30px 100px rgba(0,0,0,.45); animation: rise-in .24s ease-out; }
 .dialog-close { position: absolute; z-index: 2; top: 16px; right: 16px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; background: rgba(20,27,22,.55); color: #bdc7bb; cursor: pointer; }
 .dialog-close .icon { width: 15px; height: 15px; }
 .auth-aside { min-height: 510px; position: relative; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 30px; background: #262f28; }
@@ -212,16 +212,24 @@ h1, h2, h3, p { margin-top: 0; }
 .field input { width: 100%; height: 41px; padding: 0 12px; border: 1px solid rgba(232,239,228,.14); border-radius: 3px; outline: none; background: #1c241e; color: #edf2e8; font-size: 10px; transition: border-color .2s ease, box-shadow .2s ease; }
 .field input::placeholder { color: #778277; }
 .field input:focus { border-color: #9bbb81; box-shadow: 0 0 0 3px rgba(190,223,155,.1); }
+.field input:disabled { opacity: .65; cursor: wait; }
+.field-hint { color: #879287; font-size: 8px; line-height: 1.4; }
 .text-link { padding: 0; border: 0; background: transparent; color: #bdd9a3; cursor: pointer; font-size: inherit; }
 .text-link:hover { color: #e0f0d1; text-decoration: underline; text-underline-offset: 3px; }
+.text-link:disabled { opacity: .6; cursor: wait; }
 .forgot-link { justify-self: end; margin-top: -6px; font-size: 9px; }
 .auth-submit { width: 100%; min-height: 43px; margin-top: 2px; }
+.auth-submit:disabled { opacity: .75; cursor: wait; }
+.button-spinner { width: 13px; height: 13px; border: 2px solid rgba(20,30,20,.3); border-top-color: var(--ink); border-radius: 50%; animation: auth-spin .7s linear infinite; }
+.form-loading { display: flex; align-items: center; gap: 8px; margin: 0; color: #c3ccc1; font-size: 9px; line-height: 1.5; }
 .form-notice { margin: 0; padding: 10px 11px; border: 1px solid rgba(190,223,155,.25); border-radius: 3px; background: rgba(190,223,155,.07); color: #c8dcb9; font-size: 9px; line-height: 1.5; }
+.form-notice-error { border-color: rgba(237,139,123,.32); background: rgba(237,139,123,.08); color: #f0b2a7; }
 .auth-switch { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; margin-top: 19px; color: #8f9a90; font-size: 9px; }
 .auth-legal { margin: 18px 0 0; text-align: center; color: #69756b; font-size: 8px; }
 .auth-legal a { color: #aab5a8; text-decoration: underline; text-underline-offset: 2px; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rise-in { from { opacity: 0; transform: translateY(9px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes auth-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 900px) {
   .page-wrap { width: min(100% - 52px, 700px); }
@@ -280,7 +288,7 @@ h1, h2, h3, p { margin-top: 0; }
   .site-footer > span { order: 3; width: 100%; }
   .site-footer > div { gap: 12px; }
   .dialog-backdrop { padding: 12px; place-items: start center; }
-  .auth-dialog { display: block; min-height: unset; margin-block: auto; }
+  .auth-dialog { display: block; max-height: calc(100dvh - 24px); min-height: unset; margin-block: auto; }
   .auth-aside { min-height: 150px; padding: 18px 20px; }
   .auth-aside::before { top: -180px; right: -60px; }
   .auth-aside::after { top: -145px; right: -20px; }
