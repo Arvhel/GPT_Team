@@ -54,13 +54,13 @@ export async function proxy(request: NextRequest) {
 
     if (error) {
       return redirectWithCookies(
-        new URL("/forgot-password?error=invalid-reset-link", request.url),
+        new URL("/?auth=forgot&error=invalid-reset-link", request.url),
         supabaseResponse,
       );
     }
 
     return redirectWithCookies(
-      new URL("/reset-password", request.url),
+      new URL("/?auth=reset", request.url),
       supabaseResponse,
     );
   }
@@ -80,7 +80,7 @@ export async function proxy(request: NextRequest) {
 
   if (isDashboardRoute && !user) {
     return redirectWithCookies(
-      new URL("/login", request.url),
+      new URL("/?auth=login", request.url),
       supabaseResponse,
     );
   }
@@ -94,7 +94,7 @@ export async function proxy(request: NextRequest) {
 
   if (pathname === "/reset-password" && !user) {
     return redirectWithCookies(
-      new URL("/login?error=reset-session-missing", request.url),
+      new URL("/?auth=reset&error=reset-session-missing", request.url),
       supabaseResponse,
     );
   }

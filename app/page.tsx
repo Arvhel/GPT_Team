@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
+import { AuthTrigger, LandingAuth } from "@/app/landing-auth";
 
 const modules = [
   {
@@ -200,7 +201,16 @@ function DashboardPreview() {
   );
 }
 
-export default async function HomePage() {
+type HomePageProps = {
+  searchParams: Promise<{
+    auth?: string;
+    error?: string;
+    message?: string;
+  }>;
+};
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
 
@@ -209,8 +219,20 @@ export default async function HomePage() {
   }
 
   const workspaceHref = data.user ? "/dashboard" : "/login";
+  const initialView =
+    params.auth === "login" ||
+    params.auth === "signup" ||
+    params.auth === "forgot" ||
+    params.auth === "reset"
+      ? params.auth
+      : undefined;
 
   return (
+    <LandingAuth
+      initialView={initialView}
+      error={params.error}
+      message={params.message}
+    >
     <main>
       <header className="site-header page-wrap">
         <Brand />
@@ -220,12 +242,20 @@ export default async function HomePage() {
           <a href="#modules">What&apos;s inside</a>
         </nav>
         <div className="header-actions">
-          <Link className="header-signin" href={workspaceHref}>
-            {data.user ? "Your workspace" : "Sign in"}
-          </Link>
-          <Link className="button button-small" href={workspaceHref}>
-            {data.user ? "Open workspace" : "Get started"} <Icon name="arrow" />
-          </Link>
+          {data.user ? (
+            <Link className="header-signin" href={workspaceHref}>Your workspace</Link>
+          ) : (
+            <AuthTrigger className="header-signin" view="login">Sign in</AuthTrigger>
+          )}
+          {data.user ? (
+            <Link className="button button-small" href={workspaceHref}>
+              Open workspace <Icon name="arrow" />
+            </Link>
+          ) : (
+            <AuthTrigger className="button button-small" view="signup">
+              Get started <Icon name="arrow" />
+            </AuthTrigger>
+          )}
         </div>
       </header>
 
@@ -247,9 +277,15 @@ export default async function HomePage() {
             sales, and customers into one easy rhythm.
           </p>
           <div className="hero-actions">
-            <Link className="button button-primary" href={workspaceHref}>
-              Find your flow <Icon name="arrow" />
-            </Link>
+            {data.user ? (
+              <Link className="button button-primary" href={workspaceHref}>
+                Find your flow <Icon name="arrow" />
+              </Link>
+            ) : (
+              <AuthTrigger className="button button-primary" view="signup">
+                Find your flow <Icon name="arrow" />
+              </AuthTrigger>
+            )}
             <a className="watch-link" href="#modules">
               <span className="play-icon">↘</span> Take a look around
             </a>
@@ -345,9 +381,15 @@ export default async function HomePage() {
               <span><i>02</i> The details, where they belong</span>
               <span><i>03</i> A little more time for good work</span>
             </div>
-            <Link className="button button-dark" href={workspaceHref}>
-              Meet your new workspace <Icon name="arrow" />
-            </Link>
+            {data.user ? (
+              <Link className="button button-dark" href={workspaceHref}>
+                Meet your new workspace <Icon name="arrow" />
+              </Link>
+            ) : (
+              <AuthTrigger className="button button-dark" view="signup">
+                Meet your new workspace <Icon name="arrow" />
+              </AuthTrigger>
+            )}
           </div>
         </div>
       </section>
@@ -361,9 +403,15 @@ export default async function HomePage() {
           <em>what matters.</em>
         </h2>
         <p>Bring your team together with Hope.</p>
-        <Link className="button button-primary" href={workspaceHref}>
-          Get started with Hope <Icon name="arrow" />
-        </Link>
+        {data.user ? (
+          <Link className="button button-primary" href={workspaceHref}>
+            Get started with Hope <Icon name="arrow" />
+          </Link>
+        ) : (
+          <AuthTrigger className="button button-primary" view="signup">
+            Get started with Hope <Icon name="arrow" />
+          </AuthTrigger>
+        )}
       </section>
 
       <footer className="site-footer page-wrap">
@@ -372,11 +420,16 @@ export default async function HomePage() {
         <div>
           <a href="#privacy">Privacy</a>
           <a href="#terms">Terms</a>
-          <Link href={workspaceHref}>
-            {data.user ? "Workspace" : "Sign in"} <Icon name="arrow" />
-          </Link>
+          {data.user ? (
+            <Link href={workspaceHref}>Workspace <Icon name="arrow" /></Link>
+          ) : (
+            <AuthTrigger className="footer-auth-trigger" view="login">
+              Sign in <Icon name="arrow" />
+            </AuthTrigger>
+          )}
         </div>
       </footer>
     </main>
+    </LandingAuth>
   );
 }
