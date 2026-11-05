@@ -50,6 +50,7 @@ CREATE OR REPLACE FUNCTION public.save_product(
     p_name TEXT,
     p_description TEXT,
     p_unit_price NUMERIC(12, 2),
+    p_cost_price NUMERIC(12, 2),
     p_stock_quantity INTEGER,
     p_status TEXT
 )
@@ -69,6 +70,7 @@ BEGIN
        OR p_name IS NULL OR length(btrim(p_name)) NOT BETWEEN 1 AND 200
        OR (p_description IS NOT NULL AND length(p_description) > 2000)
        OR p_unit_price IS NULL OR p_unit_price < 0
+       OR (p_cost_price IS NOT NULL AND p_cost_price < 0)
        OR p_stock_quantity IS NULL OR p_stock_quantity < 0
        OR p_status IS NULL
        OR p_status NOT IN ('draft', 'active', 'archived', 'out_of_stock') THEN
@@ -82,6 +84,7 @@ BEGIN
             name,
             description,
             unit_price,
+            cost_price,
             status
         )
         VALUES (
@@ -90,6 +93,7 @@ BEGIN
             btrim(p_name),
             NULLIF(btrim(p_description), ''),
             p_unit_price,
+            p_cost_price,
             p_status::public.product_status
         )
         RETURNING id INTO v_product_id;
@@ -101,6 +105,7 @@ BEGIN
             name = btrim(p_name),
             description = NULLIF(btrim(p_description), ''),
             unit_price = p_unit_price,
+            cost_price = p_cost_price,
             status = p_status::public.product_status,
             updated_at = now()
         WHERE id = p_product_id
@@ -123,8 +128,33 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.save_product(
-    UUID, UUID, TEXT, TEXT, TEXT, NUMERIC, INTEGER, TEXT
+    UUID, UUID, TEXT, TEXT, TEXT, NUMERIC, NUMERIC, INTEGER, TEXT
 ) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.save_product(
-    UUID, UUID, TEXT, TEXT, TEXT, NUMERIC, INTEGER, TEXT
+    UUID, UUID, TEXT, TEXT, TEXT, NUMERIC, NUMERIC, INTEGER, TEXT
 ) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.archive_product(p_product_id UUID)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+    v_product_id UUID;
+BEGIN
+    IF (SELECT auth.uid()) IS NULL OR NOT public.is_product_manager() THEN
+        RAISE EXCEPTION 'You are not authorized to manage products.';
+    END IF;
+
+    UPDATE public.products
+    SET status = 'archived', updated_at = now()
+    WHERE id = p_product_id
+    RETURNING id INTO v_product_id;
+
+    RETURN v_product_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.archive_product(UUID) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.archive_product(UUID) TO authenticated;

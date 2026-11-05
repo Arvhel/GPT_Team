@@ -1,8 +1,8 @@
- 
- 
+
+
 CREATE TYPE public.product_status AS ENUM ('draft', 'active', 'archived', 'out_of_stock');
 
- 
+
 CREATE TABLE public.product_categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL UNIQUE,
@@ -13,7 +13,7 @@ CREATE TABLE public.product_categories (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
- 
+
 CREATE TABLE public.products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     category_id UUID REFERENCES public.product_categories(id) ON DELETE SET NULL,
@@ -23,16 +23,19 @@ CREATE TABLE public.products (
     unit_price NUMERIC(12, 2) NOT NULL CHECK (unit_price >= 0.00),
     cost_price NUMERIC(12, 2) CHECK (cost_price >= 0.00),
     status public.product_status NOT NULL DEFAULT 'active',
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
- 
-ALTER TABLE public.sales_order_items 
-    ADD CONSTRAINT fk_order_item_product 
+ALTER TABLE public.products
+    ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+
+ALTER TABLE public.sales_order_items
+    ADD CONSTRAINT fk_order_item_product
     FOREIGN KEY (product_id) REFERENCES public.products(id) ON DELETE RESTRICT;
 
- 
+
 CREATE TABLE public.product_inventory (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID NOT NULL UNIQUE REFERENCES public.products(id) ON DELETE CASCADE,
@@ -44,7 +47,95 @@ CREATE TABLE public.product_inventory (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
- 
+
 CREATE INDEX idx_products_category ON public.products(category_id);
 CREATE INDEX idx_products_sku ON public.products(sku);
 CREATE INDEX idx_inventory_product ON public.product_inventory(product_id);
+
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.product_inventory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.product_categories ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION public.is_product_manager()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+    SELECT EXISTS (
+        SELECT 1
+        FROM public.profiles
+        WHERE id = (SELECT auth.uid())
+          AND role IN ('superadmin', 'admin', 'product_manager')
+    );
+$$;
+
+REVOKE ALL ON FUNCTION public.is_product_manager() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.is_product_manager() TO authenticated;
+
+DROP POLICY IF EXISTS "Product catalog is viewable by owners and product managers"
+    ON public.products;
+CREATE POLICY "Product catalog is viewable by owners and product managers"
+    ON public.products
+    FOR SELECT
+    TO authenticated
+    USING (
+        user_id = (SELECT auth.uid())
+        OR public.is_product_manager()
+    );
+
+DROP POLICY IF EXISTS "Product managers can create products"
+    ON public.products;
+CREATE POLICY "Product managers can create products"
+    ON public.products
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (
+        user_id = (SELECT auth.uid())
+        AND public.is_product_manager()
+    );
+
+DROP POLICY IF EXISTS "Product managers can update products"
+    ON public.products;
+CREATE POLICY "Product managers can update products"
+    ON public.products
+    FOR UPDATE
+    TO authenticated
+    USING (public.is_product_manager())
+    WITH CHECK (public.is_product_manager());
+
+DROP POLICY IF EXISTS "Inventory is viewable by product owners and managers"
+    ON public.product_inventory;
+CREATE POLICY "Inventory is viewable by product owners and managers"
+    ON public.product_inventory
+    FOR SELECT
+    TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1
+            FROM public.products
+            WHERE id = product_id
+              AND (
+                  user_id = (SELECT auth.uid())
+                  OR public.is_product_manager()
+              )
+        )
+    );
+
+DROP POLICY IF EXISTS "Product managers can manage inventory"
+    ON public.product_inventory;
+CREATE POLICY "Product managers can manage inventory"
+    ON public.product_inventory
+    FOR ALL
+    TO authenticated
+    USING (public.is_product_manager())
+    WITH CHECK (public.is_product_manager());
+
+DROP POLICY IF EXISTS "Product categories are readable by authenticated users"
+    ON public.product_categories;
+CREATE POLICY "Product categories are readable by authenticated users"
+    ON public.product_categories
+    FOR SELECT
+    TO authenticated
+    USING (true);

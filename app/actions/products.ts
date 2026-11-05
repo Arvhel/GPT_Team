@@ -7,7 +7,10 @@ import type {
   ProductStatus,
 } from "@/utils/supabase/database.types";
 import { throwSupabaseError } from "@/utils/supabase/action-errors";
-import { requireProductManager } from "@/utils/supabase/product-access";
+import {
+  getProductAccess,
+  requireProductManager,
+} from "@/utils/supabase/product-access";
 
 export type ManagedProduct = Pick<
   ProductRow,
@@ -17,6 +20,7 @@ export type ManagedProduct = Pick<
   | "name"
   | "description"
   | "unit_price"
+  | "cost_price"
   | "status"
   | "created_at"
   | "updated_at"
@@ -25,6 +29,7 @@ export type ManagedProduct = Pick<
   stock_quantity: number;
 };
 
+export type Product = Omit<ManagedProduct, "category_name">;
 export type ProductCategory = { id: string; name: string };
 
 const productStatuses = ["draft", "active", "archived", "out_of_stock"] as const;
@@ -44,7 +49,7 @@ export async function getProducts(): Promise<{
     supabase
       .from("products")
       .select(
-        "id, category_id, sku, name, description, unit_price, status, created_at, updated_at",
+        "id, category_id, sku, name, description, unit_price, cost_price, status, created_at, updated_at",
       )
       .order("name"),
     supabase.from("product_categories").select("id, name").order("name"),
@@ -116,10 +121,15 @@ export async function saveProduct(formData: FormData) {
   const sku = formData.get("sku");
   const description = formData.get("description");
   const rawPrice = formData.get("unit_price");
+  const rawCostPrice = formData.get("cost_price");
   const rawStock = formData.get("stock_quantity");
   const rawStatus = formData.get("status");
   const status = typeof rawStatus === "string" ? rawStatus : "";
   const price = typeof rawPrice === "string" ? Number(rawPrice) : Number.NaN;
+  const costPrice =
+    typeof rawCostPrice === "string" && rawCostPrice.trim()
+      ? Number(rawCostPrice)
+      : null;
   const stock = typeof rawStock === "string" ? Number(rawStock) : Number.NaN;
   const invalidPath = "/products?error=invalid-input";
 
@@ -138,6 +148,11 @@ export async function saveProduct(formData: FormData) {
     price < 0 ||
     price > 9_999_999_999.99 ||
     !/^(0|[1-9]\d*)(\.\d{1,2})?$/.test(String(rawPrice)) ||
+    (costPrice !== null &&
+      (!Number.isFinite(costPrice) ||
+        costPrice < 0 ||
+        costPrice > 9_999_999_999.99 ||
+        !/^(0|[1-9]\d*)(\.\d{1,2})?$/.test(String(rawCostPrice)))) ||
     !Number.isSafeInteger(stock) ||
     stock < 0 ||
     stock > 2_147_483_647 ||
@@ -153,6 +168,7 @@ export async function saveProduct(formData: FormData) {
     p_name: name.trim(),
     p_description: description.trim() || null,
     p_unit_price: price,
+    p_cost_price: costPrice,
     p_stock_quantity: stock,
     p_status: status,
   });
@@ -172,4 +188,73 @@ export async function saveProduct(formData: FormData) {
   revalidatePath("/products");
   revalidatePath("/sales/new");
   redirect("/products?message=saved");
+}
+
+export async function createProduct(formData: FormData) {
+  await saveProduct(formData);
+}
+
+export async function updateProduct(id: string, formData: FormData) {
+  formData.set("id", id);
+  await saveProduct(formData);
+}
+
+export async function getProductById(id: string): Promise<Product | null> {
+  if (!uuidPattern.test(id)) return null;
+
+  const { supabase } = await getProductAccess();
+  const { data: product, error } = await supabase
+    .from("products")
+    .select(
+      "id, category_id, sku, name, description, unit_price, cost_price, status, created_at, updated_at",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throwSupabaseError(
+      "products.details",
+      error,
+      "Product details could not be loaded. Please try again.",
+    );
+  }
+  if (!product) return null;
+
+  const { data: inventory, error: inventoryError } = await supabase
+    .from("product_inventory")
+    .select("stock_quantity")
+    .eq("product_id", id)
+    .maybeSingle();
+
+  if (inventoryError) {
+    throwSupabaseError(
+      "products.details-inventory",
+      inventoryError,
+      "Product stock could not be loaded. Please try again.",
+    );
+  }
+
+  return { ...product, stock_quantity: inventory?.stock_quantity ?? 0 };
+}
+
+export async function deleteOrArchiveProduct(id: string) {
+  const { supabase } = await requireProductManager();
+  if (!uuidPattern.test(id)) redirect("/products?error=not-found");
+
+  const { data: archivedId, error } = await supabase.rpc("archive_product", {
+    p_product_id: id,
+  });
+
+  if (error) {
+    throwSupabaseError(
+      "products.archive-save",
+      error,
+      "The product could not be archived. Please try again.",
+    );
+  }
+  if (!archivedId) redirect("/products?error=not-found");
+
+  revalidatePath("/products");
+  revalidatePath("/sales/new");
+  redirect("/products?message=archived");
 }

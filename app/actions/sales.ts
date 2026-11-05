@@ -154,6 +154,10 @@ export async function getSalesRecords(
   if (statusFilter && statusFilter !== "all" && !isSaleStatus(statusFilter)) {
     throw new Error("Invalid sale status filter.");
   }
+  const selectedStatus: SaleStatus | undefined =
+    statusFilter && statusFilter !== "all" && isSaleStatus(statusFilter)
+      ? statusFilter
+      : undefined;
 
   const search = searchQuery?.trim().slice(0, 100);
   let matchingCustomerIds: string[] | undefined;
@@ -189,8 +193,8 @@ export async function getSalesRecords(
     .select("id, customer_id, total_amount, status, user_id, created_at, updated_at")
     .order("created_at", { ascending: false });
 
-  if (statusFilter && statusFilter !== "all") {
-    query = query.eq("status", statusFilter);
+  if (selectedStatus) {
+    query = query.eq("status", selectedStatus);
   }
 
   if (matchingCustomerIds) {

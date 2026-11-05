@@ -72,6 +72,17 @@ function ProductFields({
         />
       </label>
       <label>
+        Cost price (USD)
+        <input
+          name="cost_price"
+          type="number"
+          min="0"
+          max="9999999999.99"
+          step="0.01"
+          defaultValue={product?.cost_price ?? ""}
+        />
+      </label>
+      <label>
         Stock quantity
         <input
           name="stock_quantity"
@@ -149,6 +160,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           Product saved. Sales options now reflect the current catalog and stock.
         </p>
       )}
+      {message === "archived" && (
+        <p className="form-message form-notice" role="status">
+          Product archived.
+        </p>
+      )}
       {error === "forbidden" && (
         <p className="form-message form-error" role="alert">
           You don’t have permission to manage products.
@@ -189,6 +205,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               <th scope="col">Product / SKU</th>
               <th scope="col">Category</th>
               <th scope="col">Unit price</th>
+              <th scope="col">Cost price</th>
               <th scope="col">Stock</th>
               <th scope="col">Status</th>
               <th scope="col">Edit</th>
@@ -207,6 +224,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     style: "currency",
                     currency: "USD",
                   }).format(product.unit_price)}
+                </td>
+                <td data-label="Cost price">
+                  {product.cost_price === null
+                    ? "—"
+                    : new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      }).format(product.cost_price)}
                 </td>
                 <td data-label="Stock">{product.stock_quantity}</td>
                 <td data-label="Status">
@@ -227,7 +252,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             ))}
             {products.length === 0 && (
               <tr>
-                <td className="hrm-empty" colSpan={6}>
+                <td className="hrm-empty" colSpan={7}>
                   No products are in the catalog yet. Add a product to get started.
                 </td>
               </tr>
