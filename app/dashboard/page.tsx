@@ -35,6 +35,11 @@ export default async function DashboardPage({
             Your password was updated.
           </p>
         )}
+        <p>
+          <Link className="forgot-password-link" href="/employees">
+            Open employee directory
+          </Link>
+        </p>
         <nav className="dashboard-workspaces" aria-label="Hope workspaces">
           <Link href="/people">
             <span>01</span>
