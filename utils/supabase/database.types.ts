@@ -1,5 +1,7 @@
-export type ProductStatus = "draft" | "active" | "archived" | "out_of_stock";
+export type CustomerStatus = "active" | "archived";
 export type EmployeeStatus = "active" | "archived";
+export type ProductStatus = "draft" | "active" | "archived" | "out_of_stock";
+export type SaleStatus = "pending" | "completed" | "cancelled";
 export type UserRole =
   | "superadmin"
   | "admin"
@@ -9,7 +11,26 @@ export type UserRole =
   | "product_manager"
   | "employee";
 
-type ProductRow = {
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+export type CustomerRow = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  status: CustomerStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ProductRow = {
   id: string;
   category_id: string | null;
   sku: string;
@@ -75,9 +96,43 @@ type EmployeeRow = {
   updated_at: string;
 };
 
+export type SaleRow = {
+  id: string;
+  customer_id: string;
+  total_amount: number;
+  status: SaleStatus;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SaleItemRow = {
+  id: string;
+  sale_id: string;
+  product_id: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+};
+
 export type Database = {
   public: {
     Tables: {
+      customers: {
+        Row: CustomerRow;
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          phone?: string | null;
+          address?: string | null;
+          status?: CustomerStatus;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<CustomerRow>;
+        Relationships: [];
+      };
       departments: {
         Row: DepartmentRow;
         Insert: {
@@ -164,6 +219,56 @@ export type Database = {
         };
         Relationships: [];
       };
+      sales: {
+        Row: SaleRow;
+        Insert: {
+          id?: string;
+          customer_id: string;
+          total_amount?: number;
+          status?: SaleStatus;
+          user_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<SaleRow>;
+        Relationships: [
+          {
+            foreignKeyName: "sales_customer_id_fkey";
+            columns: ["customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      sale_items: {
+        Row: SaleItemRow;
+        Insert: {
+          id?: string;
+          sale_id: string;
+          product_id: string;
+          quantity: number;
+          unit_price: number;
+          subtotal: number;
+        };
+        Update: Partial<SaleItemRow>;
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_sale_id_fkey";
+            columns: ["sale_id"];
+            isOneToOne: false;
+            referencedRelation: "sales";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "sale_items_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -171,9 +276,24 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
+      is_customer_manager: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      is_sales_manager: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       is_product_manager: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
+      };
+      create_sale_transaction: {
+        Args: {
+          p_customer_id: string;
+          p_items: Json;
+        };
+        Returns: string;
       };
     };
     Enums: {
