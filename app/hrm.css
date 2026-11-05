@@ -208,28 +208,6 @@
   font-weight: 700;
 }
 
-.customer-history {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.customer-history li {
-  display: grid;
-  gap: 0.25rem;
-  padding: 1rem;
-  border: 1px solid #dce7df;
-  border-radius: 0.75rem;
-  background: #fff;
-}
-
-.customer-history time {
-  color: #68766d;
-  font-size: 0.9rem;
-}
-
 .hrm-department-edit-form {
   display: grid;
   grid-template-columns: minmax(10rem, 1fr) minmax(12rem, 1.5fr) auto;
