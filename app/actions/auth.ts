@@ -30,6 +30,7 @@ export async function signup(formData: FormData) {
   const { data, error } = await supabase.auth.signUp(credentials);
 
   if (error) {
+    console.error("[auth.signup] Supabase Auth request failed.", error);
     redirect("/login?error=signup-failed");
   }
 
@@ -50,6 +51,7 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(credentials);
 
   if (error) {
+    console.error("[auth.login] Supabase Auth request failed.", error);
     redirect("/login?error=login-failed");
   }
 
@@ -61,6 +63,7 @@ export async function logout() {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
+    console.error("[auth.logout] Supabase Auth request failed.", error);
     redirect("/login?error=logout-failed");
   }
 
@@ -85,6 +88,7 @@ export async function resetPassword(formData: FormData) {
   });
 
   if (error) {
+    console.error("[auth.reset-password] Supabase Auth request failed.", error);
     redirect("/forgot-password?error=reset-failed");
   }
 
@@ -108,6 +112,7 @@ export async function updatePassword(formData: FormData) {
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
+    console.error("[auth.update-password] Supabase Auth request failed.", error);
     redirect("/reset-password?error=update-failed");
   }
 

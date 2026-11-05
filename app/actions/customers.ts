@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { CustomerStatus } from "@/utils/supabase/database.types";
+import { throwSupabaseError } from "@/utils/supabase/action-errors";
 import {
   getCustomerAccess,
   requireCustomerManager,
@@ -83,7 +84,11 @@ export async function createCustomer(formData: FormData) {
     .single();
 
   if (error) {
-    throw new Error(error.message);
+    throwSupabaseError(
+      "customers.create",
+      error,
+      "The customer could not be created. Please try again.",
+    );
   }
 
   revalidatePath("/customers");
@@ -112,7 +117,11 @@ export async function updateCustomer(id: string, formData: FormData) {
     .maybeSingle();
 
   if (error) {
-    throw new Error(error.message);
+    throwSupabaseError(
+      "customers.update",
+      error,
+      "The customer could not be updated. Please try again.",
+    );
   }
 
   if (!data) {
@@ -139,7 +148,11 @@ export async function archiveCustomer(id: string) {
     .maybeSingle();
 
   if (error) {
-    throw new Error(error.message);
+    throwSupabaseError(
+      "customers.archive",
+      error,
+      "The customer could not be archived. Please try again.",
+    );
   }
 
   if (!data) {
@@ -183,7 +196,11 @@ export async function getCustomers(
   const { data, error } = await query;
 
   if (error) {
-    throw new Error(error.message);
+    throwSupabaseError(
+      "customers.list",
+      error,
+      "Customers could not be loaded. Please try again.",
+    );
   }
 
   return data;
@@ -203,7 +220,11 @@ export async function getCustomerById(id: string): Promise<Customer | null> {
     .maybeSingle();
 
   if (error) {
-    throw new Error(error.message);
+    throwSupabaseError(
+      "customers.details",
+      error,
+      "Customer details could not be loaded. Please try again.",
+    );
   }
 
   return data;

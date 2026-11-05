@@ -21,6 +21,43 @@ button, input { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { color: inherit; }
 a { color: inherit; text-decoration: none; }
+.workspace-header { min-height: 68px; display: flex; align-items: center; gap: 30px; padding: 10px clamp(18px, 4vw, 56px); border-bottom: 1px solid var(--line); background: #141a16; }
+.workspace-brand { flex: 0 0 auto; font-family: var(--serif); font-size: 22px; letter-spacing: -.8px; }
+.workspace-brand span { color: var(--moss); font-style: italic; }
+.workspace-nav { display: flex; flex: 1; align-items: center; justify-content: center; gap: 6px; }
+.workspace-nav-link { padding: 9px 12px; border-radius: 4px; color: #b6c0b6; font-size: 12px; transition: background .2s, color .2s; }
+.workspace-nav-link:hover, .workspace-nav-link.is-active { background: #283329; color: var(--moss); }
+.workspace-account { display: flex; flex: 0 1 auto; align-items: center; gap: 9px; color: #bdc6bc; font-size: 11px; }
+.workspace-account-indicator { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #849084; }
+.workspace-account-indicator.is-signed-in { background: #a9d587; }
+.workspace-account-indicator.is-error { background: #d78a77; }
+.workspace-account-label { overflow: hidden; max-width: 190px; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-account form { margin: 0; }
+.workspace-account-action { border: 0; background: transparent; color: var(--moss); cursor: pointer; font-size: 11px; white-space: nowrap; }
+.workspace-account-action:hover { text-decoration: underline; }
+.module-state { min-height: 55vh; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.module-state .intro { max-width: 42rem; }
+.module-state-actions { display: flex; align-items: center; gap: 14px; }
+.module-state-actions button { min-height: 40px; padding: 0 14px; border: 0; border-radius: 4px; background: var(--moss); color: var(--ink); cursor: pointer; }
+.module-state-actions a { color: var(--moss); }
+@media (max-width: 900px) {
+  .workspace-header { flex-wrap: wrap; gap: 8px 18px; }
+  .workspace-nav { order: 3; flex-basis: 100%; justify-content: flex-start; overflow-x: auto; }
+  .workspace-nav-link { flex: 0 0 auto; }
+  .workspace-account { margin-left: auto; }
+}
+@media (max-width: 480px) {
+  .workspace-header { padding-inline: 14px; }
+  .workspace-account-label { max-width: 115px; }
+  .workspace-nav-link { padding-inline: 8px; font-size: 11px; }
+}
+.product-create-panel, .product-edit-panel { margin: 1.5rem 0; }
+.product-create-panel > summary, .product-edit-panel > summary { color: var(--moss); cursor: pointer; font-size: 13px; }
+.product-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.product-form-description, .product-form-actions { grid-column: 1 / -1; }
+.product-management .hrm-header { margin-top: 0; }
+.product-management .hrm-table-wrap { margin-top: 1.5rem; }
+.product-edit-panel .hrm-form { min-width: 20rem; }
 .page-wrap { width: min(1192px, calc(100% - 88px)); margin-inline: auto; }
 .icon { width: 18px; height: 18px; flex: 0 0 auto; }
 

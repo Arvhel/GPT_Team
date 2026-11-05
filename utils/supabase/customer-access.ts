@@ -6,7 +6,8 @@ export async function getCustomerAccess() {
   const { data, error } = await supabase.auth.getUser();
 
   if (error) {
-    throw new Error(error.message);
+    console.error("[customers] Unable to verify the current user.", error);
+    throw new Error("Unable to verify your account. Please try again.");
   }
 
   if (!data.user) {
@@ -17,7 +18,8 @@ export async function getCustomerAccess() {
     await supabase.rpc("is_customer_manager");
 
   if (permissionError) {
-    throw new Error(permissionError.message);
+    console.error("[customers] Unable to check customer permissions.", permissionError);
+    throw new Error("Customer permissions could not be checked. Please try again.");
   }
 
   return {

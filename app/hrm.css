@@ -230,6 +230,158 @@
   font-size: 0.9rem;
 }
 
+.sales-form {
+  display: grid;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border: 1px solid #dce7df;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.sales-field {
+  display: grid;
+  gap: 0.45rem;
+  color: #34443a;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sales-field input,
+.sales-field select {
+  width: 100%;
+  min-height: 2.8rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #bdcbc1;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #17231d;
+  font: inherit;
+}
+
+.sales-field input:focus,
+.sales-field select:focus {
+  border-color: #31734b;
+  outline: 3px solid rgb(49 115 75 / 15%);
+}
+
+.sales-items {
+  display: grid;
+  gap: 1rem;
+}
+
+.sales-items-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sales-items-heading h2,
+.sales-items-heading .intro {
+  margin-bottom: 0.4rem;
+}
+
+.sales-items-heading .intro {
+  font-size: 0.9rem;
+}
+
+.sales-line-item {
+  display: grid;
+  grid-template-columns: minmax(12rem, 2fr) minmax(7rem, 0.6fr) minmax(7rem, 0.7fr) auto;
+  align-items: end;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e8eee9;
+  border-radius: 0.65rem;
+}
+
+.sales-subtotal {
+  display: grid;
+  gap: 0.45rem;
+  min-height: 2.8rem;
+  align-content: center;
+  color: #68766d;
+  font-size: 0.85rem;
+}
+
+.sales-subtotal strong {
+  color: #17231d;
+  font-size: 1rem;
+}
+
+.sales-remove-button {
+  min-height: 2.8rem;
+  background: #f0f0f0;
+  color: #59615b;
+}
+
+.sales-remove-button:hover {
+  background: #e4e6e4;
+  color: #303832;
+}
+
+.sales-remove-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.sales-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.65rem;
+  background: #edf7ef;
+  color: #245c3a;
+}
+
+.sales-total strong {
+  font-size: 1.25rem;
+}
+
+.sales-status-pending {
+  background: #fff4d6;
+  color: #76550a;
+}
+
+.sales-status-completed {
+  background: #e6f4e9;
+  color: #245c3a;
+}
+
+.sales-status-cancelled {
+  background: #fff0ed;
+  color: #8d2f21;
+}
+
+.sale-history {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.sale-history > div {
+  padding: 1rem;
+  border: 1px solid #dce7df;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.sale-history dt {
+  color: #68766d;
+  font-size: 0.875rem;
+}
+
+.sale-history dd {
+  margin: 0.45rem 0 0;
+  font-weight: 600;
+}
+
 .hrm-department-edit-form {
   display: grid;
   grid-template-columns: minmax(10rem, 1fr) minmax(12rem, 1.5fr) auto;
@@ -280,8 +432,22 @@
   .hrm-filters,
   .hrm-department-edit-form,
   .hrm-form-grid,
-  .hrm-details {
+  .hrm-details,
+  .sale-history {
     grid-template-columns: 1fr;
+  }
+
+  .sales-line-item {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sales-line-item .sales-field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .sales-items-heading {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .hrm-table thead {
