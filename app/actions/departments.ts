@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { throwSupabaseError } from "@/utils/supabase/action-errors";
 import { getHrAccess, requireHrManager } from "@/utils/supabase/hr-access";
 
 const uuidPattern =
@@ -15,7 +16,11 @@ export async function getDepartments() {
     .order("name");
 
   if (error) {
-    throw error;
+    throwSupabaseError(
+      "departments.list",
+      error,
+      "Departments could not be loaded. Please try again.",
+    );
   }
 
   return data;
@@ -62,7 +67,11 @@ export async function manageDepartments(formData: FormData) {
       redirect(`${formPath}?error=name-exists`);
     }
 
-    throw error;
+    throwSupabaseError(
+      "departments.save",
+      error,
+      "The department could not be saved. Please try again.",
+    );
   }
 
   if (isUpdate && !data) {

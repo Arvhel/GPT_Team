@@ -44,6 +44,16 @@ export type ProductRow = {
   updated_at: string;
 };
 
+type ProductCategoryRow = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  parent_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type ProductInventoryRow = {
   id: string;
   product_id: string;
@@ -186,6 +196,20 @@ export type Database = {
         Update: Partial<ProductRow>;
         Relationships: [];
       };
+      product_categories: {
+        Row: ProductCategoryRow;
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          description?: string | null;
+          parent_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<ProductCategoryRow>;
+        Relationships: [];
+      };
       product_inventory: {
         Row: ProductInventoryRow;
         Insert: ProductInventoryInsert;
@@ -294,6 +318,31 @@ export type Database = {
           p_items: Json;
         };
         Returns: string;
+      };
+      save_product: {
+        Args: {
+          p_product_id: string | null;
+          p_category_id: string | null;
+          p_sku: string;
+          p_name: string;
+          p_description: string | null;
+          p_unit_price: number;
+          p_cost_price: number | null;
+          p_stock_quantity: number;
+          p_status: string;
+        };
+        Returns: string | null;
+      };
+      archive_product: {
+        Args: { p_product_id: string };
+        Returns: string | null;
+      };
+      update_sale_status_transaction: {
+        Args: {
+          p_sale_id: string;
+          p_status: string;
+        };
+        Returns: string | null;
       };
     };
     Enums: {

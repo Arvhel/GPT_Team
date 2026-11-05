@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { EmployeeStatus } from "@/utils/supabase/database.types";
+import { throwSupabaseError } from "@/utils/supabase/action-errors";
 import { getHrAccess, requireHrManager } from "@/utils/supabase/hr-access";
 
 const employeeStatuses = ["active", "archived"] as const;
@@ -99,7 +100,11 @@ async function validateDepartment(
     .maybeSingle();
 
   if (error) {
-    throw error;
+    throwSupabaseError(
+      "employees.department-validation",
+      error,
+      "The department could not be verified. Please try again.",
+    );
   }
 
   if (!data) {
@@ -141,7 +146,11 @@ async function addDepartmentNames(
     .in("id", departmentIds);
 
   if (error) {
-    throw error;
+    throwSupabaseError(
+      "employees.department-names",
+      error,
+      "Department information could not be loaded. Please try again.",
+    );
   }
 
   const departmentNames = new Map(
@@ -183,7 +192,11 @@ export async function createEmployee(formData: FormData) {
       redirect(`${path}?error=email-exists`);
     }
 
-    throw error;
+    throwSupabaseError(
+      "employees.create",
+      error,
+      "The employee could not be created. Please try again.",
+    );
   }
 
   revalidatePath("/employees");
@@ -221,7 +234,11 @@ export async function updateEmployee(id: string, formData: FormData) {
       redirect(`${path}?error=email-exists`);
     }
 
-    throw error;
+    throwSupabaseError(
+      "employees.update",
+      error,
+      "The employee could not be updated. Please try again.",
+    );
   }
 
   if (!data) {
@@ -248,7 +265,11 @@ export async function archiveEmployee(id: string) {
     .maybeSingle();
 
   if (error) {
-    throw error;
+    throwSupabaseError(
+      "employees.archive",
+      error,
+      "The employee could not be archived. Please try again.",
+    );
   }
 
   if (!data) {
@@ -303,7 +324,11 @@ export async function getEmployees(
   const { data: employees, error } = await query;
 
   if (error) {
-    throw error;
+    throwSupabaseError(
+      "employees.list",
+      error,
+      "Employees could not be loaded. Please try again.",
+    );
   }
 
   return addDepartmentNames(supabase, employees);
@@ -323,7 +348,11 @@ export async function getEmployeeById(id: string): Promise<Employee | null> {
     .maybeSingle();
 
   if (error) {
-    throw error;
+    throwSupabaseError(
+      "employees.details",
+      error,
+      "Employee details could not be loaded. Please try again.",
+    );
   }
 
   if (!employee) {

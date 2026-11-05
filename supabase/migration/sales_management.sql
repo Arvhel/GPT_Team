@@ -88,8 +88,11 @@ CREATE TRIGGER sales_set_updated_at
     EXECUTE FUNCTION public.set_sale_updated_at();
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.product_inventory ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.products FROM anon, authenticated;
-GRANT SELECT, INSERT, UPDATE ON public.products TO authenticated;
+REVOKE ALL ON public.product_inventory FROM anon, authenticated;
+GRANT SELECT ON public.products TO authenticated;
+GRANT SELECT ON public.product_inventory TO authenticated;
 
 DROP POLICY IF EXISTS "Sales and product teams can view products" ON public.products;
 CREATE POLICY "Sales and product teams can view products"
@@ -101,23 +104,22 @@ CREATE POLICY "Sales and product teams can view products"
     );
 
 DROP POLICY IF EXISTS "Product managers can create products" ON public.products;
-CREATE POLICY "Product managers can create products"
-    ON public.products FOR INSERT
-    TO authenticated
-    WITH CHECK (public.is_product_manager());
-
 DROP POLICY IF EXISTS "Product managers can update products" ON public.products;
-CREATE POLICY "Product managers can update products"
-    ON public.products FOR UPDATE
+
+DROP POLICY IF EXISTS "Product and sales teams can view inventory" ON public.product_inventory;
+CREATE POLICY "Product and sales teams can view inventory"
+    ON public.product_inventory FOR SELECT
     TO authenticated
-    USING (public.is_product_manager())
-    WITH CHECK (public.is_product_manager());
+    USING (
+        public.is_sales_manager()
+        OR public.is_product_manager()
+    );
 
 ALTER TABLE public.sales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sale_items ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.sales FROM anon, authenticated;
 REVOKE ALL ON public.sale_items FROM anon, authenticated;
-GRANT SELECT, UPDATE (status) ON public.sales TO authenticated;
+GRANT SELECT ON public.sales TO authenticated;
 GRANT SELECT ON public.sale_items TO authenticated;
 
 DROP POLICY IF EXISTS "Sales managers can view sales" ON public.sales;
@@ -127,11 +129,6 @@ CREATE POLICY "Sales managers can view sales"
     USING (public.is_sales_manager());
 
 DROP POLICY IF EXISTS "Sales managers can update sale statuses" ON public.sales;
-CREATE POLICY "Sales managers can update sale statuses"
-    ON public.sales FOR UPDATE
-    TO authenticated
-    USING (public.is_sales_manager())
-    WITH CHECK (public.is_sales_manager());
 
 DROP POLICY IF EXISTS "Sales managers can view sale items" ON public.sale_items;
 CREATE POLICY "Sales managers can view sale items"
@@ -154,6 +151,7 @@ DECLARE
     v_quantity INTEGER;
     v_requested_price NUMERIC(12, 2);
     v_unit_price NUMERIC(12, 2);
+    v_stock_quantity INTEGER;
     v_subtotal NUMERIC;
     v_total NUMERIC(12, 2) := 0;
     v_sale_id UUID;
@@ -185,7 +183,10 @@ BEGIN
         RAISE EXCEPTION 'A sale must contain between 1 and 100 line items.';
     END IF;
 
-    FOR v_item IN SELECT value FROM jsonb_array_elements(p_items)
+    FOR v_item IN
+        SELECT value
+        FROM jsonb_array_elements(p_items)
+        ORDER BY (value ->> 'productId')::UUID
     LOOP
         IF jsonb_typeof(v_item) <> 'object'
            OR v_item ->> 'productId' IS NULL
@@ -217,6 +218,22 @@ BEGIN
         IF v_requested_price <> v_unit_price THEN
             RAISE EXCEPTION 'A product price changed. Refresh the page and try again.';
         END IF;
+
+        SELECT inventory.stock_quantity
+        INTO v_stock_quantity
+        FROM public.product_inventory AS inventory
+        WHERE inventory.product_id = v_product_id
+        FOR UPDATE;
+
+        IF NOT FOUND OR v_stock_quantity < v_quantity THEN
+            RAISE EXCEPTION 'Insufficient stock for a selected product.';
+        END IF;
+
+        UPDATE public.product_inventory
+        SET
+            stock_quantity = stock_quantity - v_quantity,
+            updated_at = now()
+        WHERE product_id = v_product_id;
 
         v_subtotal := round(v_unit_price * v_quantity, 2);
         IF v_subtotal > 9999999999.99
@@ -264,3 +281,85 @@ $$;
 
 REVOKE ALL ON FUNCTION public.create_sale_transaction(UUID, JSONB) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.create_sale_transaction(UUID, JSONB) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.update_sale_status_transaction(
+    p_sale_id UUID,
+    p_status TEXT
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+    v_sale public.sales%ROWTYPE;
+    v_item RECORD;
+    v_stock_quantity INTEGER;
+BEGIN
+    IF (SELECT auth.uid()) IS NULL OR NOT public.is_sales_manager() THEN
+        RAISE EXCEPTION 'You are not authorized to update sales.';
+    END IF;
+
+    IF p_status IS NULL
+       OR p_status NOT IN ('pending', 'completed', 'cancelled') THEN
+        RAISE EXCEPTION 'Select a valid sale status.';
+    END IF;
+
+    SELECT *
+    INTO v_sale
+    FROM public.sales
+    WHERE id = p_sale_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RETURN NULL;
+    END IF;
+
+    IF v_sale.status <> p_status
+       AND ((v_sale.status = 'cancelled') <> (p_status = 'cancelled')) THEN
+        FOR v_item IN
+            SELECT product_id, quantity
+            FROM public.sale_items
+            WHERE sale_id = p_sale_id
+            ORDER BY product_id
+        LOOP
+            SELECT stock_quantity
+            INTO v_stock_quantity
+            FROM public.product_inventory
+            WHERE product_id = v_item.product_id
+            FOR UPDATE;
+
+            IF NOT FOUND THEN
+                RAISE EXCEPTION 'Stock information for a sale item is unavailable.';
+            END IF;
+
+            IF p_status = 'cancelled' THEN
+                UPDATE public.product_inventory
+                SET
+                    stock_quantity = stock_quantity + v_item.quantity,
+                    updated_at = now()
+                WHERE product_id = v_item.product_id;
+            ELSE
+                IF v_stock_quantity < v_item.quantity THEN
+                    RAISE EXCEPTION 'There is not enough stock to reopen this sale.';
+                END IF;
+
+                UPDATE public.product_inventory
+                SET
+                    stock_quantity = stock_quantity - v_item.quantity,
+                    updated_at = now()
+                WHERE product_id = v_item.product_id;
+            END IF;
+        END LOOP;
+    END IF;
+
+    UPDATE public.sales
+    SET status = p_status
+    WHERE id = p_sale_id;
+
+    RETURN p_sale_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.update_sale_status_transaction(UUID, TEXT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.update_sale_status_transaction(UUID, TEXT) TO authenticated;

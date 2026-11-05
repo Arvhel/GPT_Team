@@ -6,7 +6,8 @@ export async function getHrAccess() {
   const { data, error } = await supabase.auth.getUser();
 
   if (error) {
-    throw error;
+    console.error("[hr] Unable to verify the current user.", error);
+    throw new Error("Unable to verify your account. Please try again.");
   }
 
   if (!data.user) {
@@ -17,7 +18,8 @@ export async function getHrAccess() {
     await supabase.rpc("is_hr_admin");
 
   if (permissionError) {
-    throw permissionError;
+    console.error("[hr] Unable to check HR permissions.", permissionError);
+    throw new Error("HR permissions could not be checked. Please try again.");
   }
 
   return {

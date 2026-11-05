@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import WorkspaceHeader from "@/app/components/workspace-header";
 import "./globals.css";
 import "./hrm.css";
 
@@ -15,7 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <WorkspaceHeader />
+        {children}
+      </body>
     </html>
   );
 }

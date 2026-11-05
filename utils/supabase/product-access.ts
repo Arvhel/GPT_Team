@@ -6,7 +6,8 @@ export async function getProductAccess() {
   const { data, error } = await supabase.auth.getUser();
 
   if (error) {
-    throw error;
+    console.error("[products] Unable to verify the current user.", error);
+    throw new Error("Unable to verify your account. Please try again.");
   }
 
   if (!data.user) {
@@ -17,14 +18,11 @@ export async function getProductAccess() {
     await supabase.rpc("is_product_manager");
 
   if (permissionError) {
-    throw permissionError;
+    console.error("[products] Unable to check product permissions.", permissionError);
+    throw new Error("Product permissions could not be checked. Please try again.");
   }
 
-  return {
-    supabase,
-    user: data.user,
-    canManageProducts,
-  };
+  return { supabase, user: data.user, canManageProducts };
 }
 
 export async function requireProductManager() {

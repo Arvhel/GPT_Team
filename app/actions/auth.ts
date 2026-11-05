@@ -22,57 +22,37 @@ function getCredentials(formData: FormData) {
 
 export async function signup(formData: FormData) {
   const credentials = getCredentials(formData);
-  const firstName = formData.get("firstName");
-  const lastName = formData.get("lastName");
-  const company = formData.get("company");
-
-  if (
-    !credentials ||
-    credentials.password.length < 8 ||
-    typeof firstName !== "string" ||
-    !firstName.trim() ||
-    typeof lastName !== "string" ||
-    !lastName.trim() ||
-    typeof company !== "string" ||
-    !company.trim()
-  ) {
-    redirect("/?auth=signup&error=invalid-input");
+  if (!credentials || credentials.password.length < 6) {
+    redirect("/login?error=invalid-input");
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
-    ...credentials,
-    options: {
-      data: {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        company_name: company.trim(),
-      },
-    },
-  });
+  const { data, error } = await supabase.auth.signUp(credentials);
 
   if (error) {
-    redirect("/?auth=signup&error=signup-failed");
+    console.error("[auth.signup] Supabase Auth request failed.", error);
+    redirect("/login?error=signup-failed");
   }
 
   if (data.session) {
     redirect("/dashboard");
   }
 
-  redirect("/?auth=login&message=check-email");
+  redirect("/login?message=check-email");
 }
 
 export async function login(formData: FormData) {
   const credentials = getCredentials(formData);
   if (!credentials) {
-    redirect("/?auth=login&error=invalid-input");
+    redirect("/login?error=invalid-input");
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(credentials);
 
   if (error) {
-    redirect("/?auth=login&error=login-failed");
+    console.error("[auth.login] Supabase Auth request failed.", error);
+    redirect("/login?error=login-failed");
   }
 
   redirect("/dashboard");
@@ -83,22 +63,23 @@ export async function logout() {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    redirect("/?auth=login&error=logout-failed");
+    console.error("[auth.logout] Supabase Auth request failed.", error);
+    redirect("/login?error=logout-failed");
   }
 
-  redirect("/?auth=login&message=signed-out");
+  redirect("/login?message=signed-out");
 }
 
 export async function resetPassword(formData: FormData) {
   const email = formData.get("email");
 
   if (typeof email !== "string" || !email.trim()) {
-    redirect("/?auth=forgot&error=invalid-input");
+    redirect("/forgot-password?error=invalid-input");
   }
 
   const origin = (await headers()).get("origin");
   if (!origin) {
-    redirect("/?auth=forgot&error=request-failed");
+    redirect("/forgot-password?error=request-failed");
   }
 
   const supabase = await createClient();
@@ -107,10 +88,11 @@ export async function resetPassword(formData: FormData) {
   });
 
   if (error) {
-    redirect("/?auth=forgot&error=reset-failed");
+    console.error("[auth.reset-password] Supabase Auth request failed.", error);
+    redirect("/forgot-password?error=reset-failed");
   }
 
-  redirect("/?auth=forgot&message=reset-email");
+  redirect("/forgot-password?message=check-email");
 }
 
 export async function updatePassword(formData: FormData) {
@@ -123,14 +105,15 @@ export async function updatePassword(formData: FormData) {
     password.length < 8 ||
     password !== confirmPassword
   ) {
-    redirect("/?auth=reset&error=invalid-password");
+    redirect("/reset-password?error=invalid-password");
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
-    redirect("/?auth=reset&error=update-failed");
+    console.error("[auth.update-password] Supabase Auth request failed.", error);
+    redirect("/reset-password?error=update-failed");
   }
 
   redirect("/dashboard?message=password-updated");

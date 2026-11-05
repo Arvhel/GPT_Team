@@ -9,7 +9,7 @@ import { useState, useTransition } from "react";
 type SaleProductOption = Pick<
   ProductRow,
   "id" | "name" | "sku" | "unit_price"
->;
+> & { stock_quantity: number };
 
 type SaleFormProps = {
   customers: SaleCustomerOption[];
@@ -59,7 +59,11 @@ export default function SaleForm({ customers, products }: SaleFormProps) {
         Number.isSafeInteger(Number(item.quantity)) &&
         Number(item.quantity) > 0 &&
         Number(item.quantity) <= 2_147_483_647 &&
-        products.some((product) => product.id === item.productId),
+        products.some(
+          (product) =>
+            product.id === item.productId &&
+            Number(item.quantity) <= product.stock_quantity,
+        ),
     );
 
   function updateItem(index: number, patch: Partial<DraftItem>) {
@@ -183,7 +187,7 @@ export default function SaleForm({ customers, products }: SaleFormProps) {
                     )
                     .map((option) => (
                       <option key={option.id} value={option.id}>
-                        {option.name} ({option.sku}) · {currency.format(option.unit_price)}
+                        {option.name} ({option.sku}) · {currency.format(option.unit_price)} · {option.stock_quantity} available
                       </option>
                     ))}
                 </select>
@@ -193,7 +197,7 @@ export default function SaleForm({ customers, products }: SaleFormProps) {
                 <input
                   type="number"
                   min="1"
-                  max="2147483647"
+                  max={product?.stock_quantity ?? 2_147_483_647}
                   step="1"
                   required
                   value={item.quantity}
@@ -201,6 +205,11 @@ export default function SaleForm({ customers, products }: SaleFormProps) {
                     updateItem(index, { quantity: event.target.value })
                   }
                 />
+                {product && (
+                  <span className="hrm-hint">
+                    {product.stock_quantity} units available
+                  </span>
+                )}
               </label>
               <div className="sales-subtotal">
                 <span>Subtotal</span>

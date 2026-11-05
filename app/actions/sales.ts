@@ -10,6 +10,7 @@ import type {
   SaleRow,
   SaleStatus,
 } from "@/utils/supabase/database.types";
+import { throwSupabaseError } from "@/utils/supabase/action-errors";
 import { requireSalesManager } from "@/utils/supabase/sales-access";
 
 export type SaleRecord = SaleRow & {
@@ -86,7 +87,17 @@ export async function createSaleTransaction(
   );
 
   if (error) {
-    throw new Error(error.message);
+    console.error("[sales.create] Supabase request failed.", error);
+    const userMessage = error.message.includes("Insufficient stock")
+      ? "Some selected products do not have enough stock. Update the quantities and try again."
+      : error.message.includes("price changed")
+        ? "A product price changed. Refresh the page and try again."
+        : error.message.includes("no longer available")
+          ? "A selected product is no longer active. Refresh the page and try again."
+          : error.message.includes("active customer")
+            ? "Select an active customer and try again."
+            : "The sale could not be created. Please try again.";
+    throw new Error(userMessage);
   }
 
   if (!saleId) {
@@ -107,15 +118,22 @@ export async function updateSaleStatus(
     redirect("/sales?error=invalid-input");
   }
 
-  const { data, error } = await supabase
-    .from("sales")
-    .update({ status })
-    .eq("id", saleId)
-    .select("id")
-    .maybeSingle();
+  const { data, error } = await supabase.rpc(
+    "update_sale_status_transaction",
+    {
+      p_sale_id: saleId,
+      p_status: status,
+    },
+  );
 
   if (error) {
-    throw new Error(error.message);
+    console.error("[sales.update-status] Supabase request failed.", error);
+    if (error.message.includes("not enough stock")) {
+      throw new Error(
+        "This cancelled sale cannot be reopened because there is not enough stock.",
+      );
+    }
+    throw new Error("The sale status could not be updated. Please try again.");
   }
 
   if (!data) {
@@ -136,6 +154,10 @@ export async function getSalesRecords(
   if (statusFilter && statusFilter !== "all" && !isSaleStatus(statusFilter)) {
     throw new Error("Invalid sale status filter.");
   }
+  const selectedStatus: SaleStatus | undefined =
+    statusFilter && statusFilter !== "all" && isSaleStatus(statusFilter)
+      ? statusFilter
+      : undefined;
 
   const search = searchQuery?.trim().slice(0, 100);
   let matchingCustomerIds: string[] | undefined;
@@ -153,7 +175,11 @@ export async function getSalesRecords(
       .or(`name.ilike.${pattern},email.ilike.${pattern}`);
 
     if (error) {
-      throw new Error(error.message);
+      throwSupabaseError(
+        "sales.search-customers",
+        error,
+        "Sales could not be searched. Please try again.",
+      );
     }
 
     matchingCustomerIds = matchingCustomers.map((customer) => customer.id);
@@ -167,8 +193,8 @@ export async function getSalesRecords(
     .select("id, customer_id, total_amount, status, user_id, created_at, updated_at")
     .order("created_at", { ascending: false });
 
-  if (statusFilter && statusFilter !== "all") {
-    query = query.eq("status", statusFilter);
+  if (selectedStatus) {
+    query = query.eq("status", selectedStatus);
   }
 
   if (matchingCustomerIds) {
@@ -177,7 +203,11 @@ export async function getSalesRecords(
 
   const { data: sales, error } = await query;
   if (error) {
-    throw new Error(error.message);
+    throwSupabaseError(
+      "sales.list",
+      error,
+      "Sales could not be loaded. Please try again.",
+    );
   }
 
   if (sales.length === 0) {
@@ -193,7 +223,11 @@ export async function getSalesRecords(
     );
 
   if (customersError) {
-    throw new Error(customersError.message);
+    throwSupabaseError(
+      "sales.customer-details",
+      customersError,
+      "Customer information for sales could not be loaded. Please try again.",
+    );
   }
 
   const customersById = new Map(
@@ -226,7 +260,11 @@ export async function getSaleDetails(saleId: string): Promise<SaleDetails | null
     .maybeSingle();
 
   if (error) {
-    throw new Error(error.message);
+    throwSupabaseError(
+      "sales.details",
+      error,
+      "Sale details could not be loaded. Please try again.",
+    );
   }
 
   if (!sale) {
@@ -247,10 +285,18 @@ export async function getSaleDetails(saleId: string): Promise<SaleDetails | null
   ]);
 
   if (customerResult.error) {
-    throw new Error(customerResult.error.message);
+    throwSupabaseError(
+      "sales.details-customer",
+      customerResult.error,
+      "Customer information for the sale could not be loaded. Please try again.",
+    );
   }
   if (itemsResult.error) {
-    throw new Error(itemsResult.error.message);
+    throwSupabaseError(
+      "sales.details-items",
+      itemsResult.error,
+      "Sale items could not be loaded. Please try again.",
+    );
   }
   if (!customerResult.data) {
     return null;
@@ -268,7 +314,11 @@ export async function getSaleDetails(saleId: string): Promise<SaleDetails | null
       : { data: [], error: null };
 
   if (productsError) {
-    throw new Error(productsError.message);
+    throwSupabaseError(
+      "sales.details-products",
+      productsError,
+      "Product information for the sale could not be loaded. Please try again.",
+    );
   }
 
   const productsById = new Map(products.map((product) => [product.id, product]));
@@ -291,7 +341,9 @@ export async function getSaleDetails(saleId: string): Promise<SaleDetails | null
 
 export async function getSaleCreationOptions(): Promise<{
   customers: SaleCustomerOption[];
-  products: Pick<ProductRow, "id" | "name" | "sku" | "unit_price">[];
+  products: (Pick<ProductRow, "id" | "name" | "sku" | "unit_price"> & {
+    stock_quantity: number;
+  })[];
 }> {
   const { supabase } = await requireSalesManager();
   const [customersResult, productsResult] = await Promise.all([
@@ -308,14 +360,50 @@ export async function getSaleCreationOptions(): Promise<{
   ]);
 
   if (customersResult.error) {
-    throw new Error(customersResult.error.message);
+    throwSupabaseError(
+      "sales.customer-options",
+      customersResult.error,
+      "Available customers could not be loaded. Please try again.",
+    );
   }
   if (productsResult.error) {
-    throw new Error(productsResult.error.message);
+    throwSupabaseError(
+      "sales.product-options",
+      productsResult.error,
+      "Available products could not be loaded. Please try again.",
+    );
   }
+
+  const { data: inventory, error: inventoryError } =
+    productsResult.data.length > 0
+      ? await supabase
+          .from("product_inventory")
+          .select("product_id, stock_quantity")
+          .in(
+            "product_id",
+            productsResult.data.map((product) => product.id),
+          )
+      : { data: [], error: null };
+
+  if (inventoryError) {
+    throwSupabaseError(
+      "sales.inventory-options",
+      inventoryError,
+      "Available stock could not be loaded. Please try again.",
+    );
+  }
+
+  const stockByProductId = new Map(
+    inventory.map((item) => [item.product_id, item.stock_quantity]),
+  );
 
   return {
     customers: customersResult.data,
-    products: productsResult.data,
+    products: productsResult.data.flatMap((product) => {
+      const stockQuantity = stockByProductId.get(product.id) ?? 0;
+      return stockQuantity > 0
+        ? [{ ...product, stock_quantity: stockQuantity }]
+        : [];
+    }),
   };
 }
