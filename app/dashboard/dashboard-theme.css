@@ -1,0 +1,417 @@
+.products-app {
+  --dash-accent: #557447;
+  --dash-accent-soft: #eaf1e4;
+  --dash-sidebar: #1d2921;
+  --dash-sidebar-raised: #2a392d;
+  --dash-shadow: 0 12px 32px rgba(34, 43, 33, .055);
+}
+.people-app {
+  --dash-accent: #75805b;
+  --dash-accent-soft: #eff0e5;
+  --dash-sidebar: #292e28;
+  --dash-sidebar-raised: #3a4034;
+  --dash-shadow: 0 12px 32px rgba(44, 44, 34, .055);
+}
+.customers-app {
+  --dash-accent: #a3634b;
+  --dash-accent-soft: #f5ebe5;
+  --dash-sidebar: #292a29;
+  --dash-sidebar-raised: #403832;
+  --dash-shadow: 0 12px 32px rgba(53, 42, 34, .055);
+}
+.sales-app {
+  --dash-accent: #5f7950;
+  --dash-accent-soft: #eaf0e4;
+  --dash-sidebar: #202b23;
+  --dash-sidebar-raised: #344135;
+  --dash-shadow: 0 12px 32px rgba(34, 43, 33, .055);
+}
+.products-app,
+.people-app,
+.customers-app,
+.sales-app {
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+.dashboard-overview {
+  --dash-accent: #607650;
+  --dash-accent-soft: #eaf0e4;
+  --dash-sidebar: #202b23;
+  --dash-sidebar-raised: #344135;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 5vw, 64px);
+  background:
+    radial-gradient(ellipse at 12% 9%, rgba(201, 218, 183, .44), transparent 35%),
+    radial-gradient(ellipse at 88% 90%, rgba(222, 216, 193, .38), transparent 34%),
+    #f4f4ed;
+}
+.dashboard-overview-card {
+  width: min(900px, 100%);
+  padding: clamp(26px, 5vw, 54px);
+  border: 1px solid rgba(89, 105, 78, .15);
+  border-radius: 20px;
+  background: rgba(255, 255, 250, .88);
+  box-shadow: 0 24px 70px rgba(36, 47, 36, .1);
+  backdrop-filter: blur(12px);
+}
+.dashboard-overview-card > .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--dash-accent);
+  letter-spacing: 1.8px;
+}
+.dashboard-overview-card > .eyebrow::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #91aa7c;
+  box-shadow: 0 0 0 4px var(--dash-accent-soft);
+  content: "";
+}
+.dashboard-overview-card h1 {
+  margin-top: 18px !important;
+  font-size: clamp(42px, 6vw, 62px) !important;
+  letter-spacing: -2.6px !important;
+}
+.dashboard-overview-card .intro {
+  margin-bottom: 30px !important;
+  font-size: 13px !important;
+}
+.dashboard-overview-card .dashboard-workspaces {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+.dashboard-overview-card .dashboard-workspaces a {
+  min-height: 133px;
+  align-content: start;
+  gap: 9px;
+  padding: 21px 20px 19px 58px;
+  border: 1px solid rgba(88, 106, 77, .14);
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fffefa, #f8f8f1);
+  box-shadow: 0 5px 16px rgba(35, 44, 33, .035);
+}
+.dashboard-overview-card .dashboard-workspaces a > span {
+  top: 21px;
+  left: 20px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--dash-accent-soft);
+  color: var(--dash-accent);
+  font-size: 8px;
+}
+.dashboard-overview-card .dashboard-workspaces strong {
+  color: #333a30;
+  font-size: 19px;
+}
+.dashboard-overview-card .dashboard-workspaces small {
+  font-size: 10px;
+}
+.dashboard-overview-card > form {
+  margin-top: 23px;
+}
+.dashboard-overview-card > form button {
+  min-width: 100px;
+  min-height: 40px;
+  border-radius: 7px;
+  background: var(--dash-accent);
+  color: white;
+}
+
+.products-sidebar,
+.people-sidebar,
+.customers-sidebar,
+.sales-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  align-self: start;
+  overflow-y: auto;
+  background: linear-gradient(165deg, var(--dash-sidebar), color-mix(in srgb, var(--dash-sidebar) 89%, black)) !important;
+  box-shadow: 8px 0 28px rgba(28, 35, 28, .08);
+  scrollbar-color: rgba(227, 233, 220, .2) transparent;
+  scrollbar-width: thin;
+}
+.products-workspace,
+.sidebar-workspace,
+.people-workspace,
+.customers-workspace,
+.sales-workspace {
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, .055) !important;
+  border-color: rgba(255, 255, 255, .12) !important;
+}
+.products-nav a,
+.people-nav a,
+.customers-nav > a,
+.sales-nav > a {
+  min-height: 43px;
+  border-radius: 8px !important;
+  transition: background .2s ease, color .2s ease, transform .2s ease !important;
+}
+.products-nav a:hover,
+.people-nav a:hover,
+.customers-nav > a:hover,
+.sales-nav > a:hover {
+  transform: translateX(2px);
+}
+.products-nav a.active,
+.people-nav a.active,
+.customers-nav > a.active,
+.sales-nav > a.active {
+  background: var(--dash-sidebar-raised) !important;
+  color: #f5f5ec !important;
+}
+.products-nav a.active::before,
+.people-nav a.active::before,
+.customers-nav > a.active::before,
+.sales-nav > a.active::before {
+  width: 3px;
+  height: 22px;
+  border-radius: 0 4px 4px 0;
+  background: #c4d8a9 !important;
+}
+.products-topbar,
+.people-topbar,
+.customers-topbar,
+.sales-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  height: 70px;
+  border-bottom-color: rgba(84, 92, 75, .12) !important;
+  background: rgba(250, 250, 245, .88) !important;
+  backdrop-filter: blur(14px);
+}
+.products-content,
+.people-content,
+.customers-content,
+.sales-content {
+  padding-top: clamp(32px, 4vw, 52px);
+  padding-bottom: 42px;
+}
+.products-heading h1,
+.people-welcome h1,
+.customers-heading h1,
+.sales-heading h1 {
+  color: #282f28 !important;
+  letter-spacing: -2.4px !important;
+}
+.products-heading h1 .heading-period,
+.people-welcome h1 > span,
+.customers-heading h1 > span,
+.sales-heading h1 > span {
+  color: var(--dash-accent) !important;
+}
+.products-eyebrow,
+.people-eyebrow,
+.customers-eyebrow,
+.sales-eyebrow {
+  color: var(--dash-accent) !important;
+}
+.products-primary-button,
+.people-button-primary,
+.customer-primary-button,
+.sales-primary-button {
+  min-height: 41px;
+  border-radius: 8px !important;
+  background: var(--dash-accent) !important;
+  box-shadow: 0 5px 12px color-mix(in srgb, var(--dash-accent) 18%, transparent);
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease !important;
+}
+.products-primary-button:hover,
+.people-button-primary:hover,
+.customer-primary-button:hover,
+.sales-primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 18px color-mix(in srgb, var(--dash-accent) 22%, transparent);
+}
+.products-secondary-button,
+.people-button-secondary,
+.customer-secondary-button,
+.sales-secondary-button {
+  min-height: 39px;
+  border-radius: 8px !important;
+}
+.overview-card,
+.people-stat-card,
+.customer-stat-card,
+.sales-stat-card {
+  border-radius: 12px !important;
+  box-shadow: 0 5px 18px rgba(39, 43, 34, .035);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.overview-card:hover,
+.people-stat-card:hover,
+.customer-stat-card:hover,
+.sales-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--dash-shadow);
+}
+.overview-total,
+.customer-stat-total,
+.sales-stat-highlight {
+  border-color: color-mix(in srgb, var(--dash-accent) 25%, white) !important;
+  background: var(--dash-accent-soft) !important;
+}
+.overview-total > strong,
+.customer-stat-total > strong,
+.sales-stat-highlight > strong {
+  color: var(--dash-accent) !important;
+}
+.product-list-section,
+.people-team-panel,
+.people-directory,
+.people-department-strip,
+.customer-list-panel,
+.sales-records,
+.sales-chart-panel {
+  border: 1px solid rgba(87, 94, 77, .12) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 251, .92) !important;
+  box-shadow: var(--dash-shadow);
+}
+.product-table thead th,
+.people-table thead th,
+.customer-table thead th,
+.sales-table thead th {
+  background: #f6f6f0;
+  color: #75796f;
+  letter-spacing: .8px;
+}
+.product-table tbody tr,
+.people-table tbody tr,
+.customer-table tbody tr,
+.sales-table tbody tr {
+  transition: background .16s ease;
+}
+.product-table tbody tr:hover,
+.people-table tbody tr:hover,
+.customer-table tbody tr:hover,
+.sales-table tbody tr:hover {
+  background: var(--dash-accent-soft) !important;
+}
+@media (max-width: 760px) {
+  .products-app,
+  .people-app,
+  .sales-app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .products-sidebar,
+  .people-sidebar,
+  .customers-sidebar,
+  .sales-sidebar {
+    min-width: 0;
+  }
+  .products-nav,
+  .people-nav,
+  .customers-nav,
+  .sales-nav {
+    max-width: 100%;
+  }
+}
+.products-app input:focus-visible,
+.products-app select:focus-visible,
+.people-app input:focus-visible,
+.people-app select:focus-visible,
+.customers-app input:focus-visible,
+.customers-app select:focus-visible,
+.customers-app textarea:focus-visible,
+.sales-app input:focus-visible,
+.sales-app select:focus-visible,
+.sales-app textarea:focus-visible,
+.products-app button:focus-visible,
+.people-app button:focus-visible,
+.customers-app button:focus-visible,
+.sales-app button:focus-visible,
+.products-app a:focus-visible,
+.people-app a:focus-visible,
+.customers-app a:focus-visible,
+.sales-app a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--dash-accent) 45%, transparent);
+  outline-offset: 2px;
+}
+.products-modal-backdrop,
+.people-modal-backdrop,
+.customer-modal-backdrop,
+.sales-modal-backdrop {
+  background: rgba(23, 30, 24, .58) !important;
+  backdrop-filter: blur(6px);
+}
+.products-modal,
+.people-modal,
+.customer-modal,
+.sales-modal {
+  border-radius: 14px !important;
+  box-shadow: 0 28px 85px rgba(15, 22, 16, .24) !important;
+}
+.dashboard-overview-card .dashboard-workspaces a:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--dash-accent) 42%, white);
+  box-shadow: 0 14px 28px rgba(35, 44, 33, .09);
+}
+
+@media (max-width: 760px) {
+  .products-sidebar,
+  .people-sidebar,
+  .customers-sidebar,
+  .sales-sidebar {
+    position: relative;
+    height: auto;
+    overflow: visible;
+  }
+  .products-topbar,
+  .people-topbar,
+  .customers-topbar,
+  .sales-topbar {
+    position: sticky;
+    top: 0;
+    height: 58px;
+  }
+  .dashboard-overview-card .dashboard-workspaces {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .products-content,
+  .people-content,
+  .customers-content,
+  .sales-content {
+    padding-top: 27px;
+    padding-bottom: 30px;
+  }
+  .products-heading h1,
+  .people-welcome h1,
+  .customers-heading h1,
+  .sales-heading h1 {
+    letter-spacing: -1.7px !important;
+  }
+  .dashboard-overview {
+    padding: 14px;
+  }
+  .dashboard-overview-card {
+    padding: 26px 20px;
+    border-radius: 15px;
+  }
+  .dashboard-overview-card .dashboard-workspaces a {
+    min-height: 115px;
+    padding: 18px 16px 16px 52px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .products-app *,
+  .people-app *,
+  .customers-app *,
+  .sales-app *,
+  .dashboard-overview-card * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -1,0 +1,20 @@
+ 
+INSERT INTO public.product_categories (id, name, slug, description)
+VALUES 
+    ('d1111111-1111-1111-1111-111111111101', 'Electronics', 'electronics', 'Electronic devices, hardware, and tech accessories'),
+    ('d1111111-1111-1111-1111-111111111102', 'Office Supplies', 'office-supplies', 'Paper, desk organizers, and daily office essentials')
+ON CONFLICT (id) DO NOTHING;
+
+ 
+INSERT INTO public.products (id, category_id, sku, name, description, unit_price, cost_price, status)
+VALUES 
+    ('e2222222-2222-2222-2222-222222222201', 'd1111111-1111-1111-1111-111111111101', 'ELEC-LAP-001', 'Ergonomic Wireless Mouse', 'High-precision wireless mouse with adjustable DPI', 49.99, 22.00, 'active'),
+    ('e2222222-2222-2222-2222-222222222202', 'd1111111-1111-1111-1111-111111111102', 'OFF-DESK-005', 'Standing Desk Mat', 'Anti-fatigue comfort mat for standing desks', 79.99, 35.00, 'active')
+ON CONFLICT (sku) DO NOTHING;
+
+ 
+INSERT INTO public.product_inventory (product_id, stock_quantity, low_stock_threshold, warehouse_location)
+VALUES 
+    ('e2222222-2222-2222-2222-222222222201', 150, 15, 'Warehouse A - Bay 3'),
+    ('e2222222-2222-2222-2222-222222222202', 45, 10, 'Warehouse B - Shelf 12')
+ON CONFLICT (product_id) DO NOTHING;

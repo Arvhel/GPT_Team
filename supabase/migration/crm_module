@@ -1,0 +1,97 @@
+ 
+ 
+CREATE TYPE public.customer_type AS ENUM ('lead', 'prospect', 'active_client', 'churned', 'partner');
+CREATE TYPE public.interaction_type AS ENUM ('call', 'email', 'meeting', 'demo', 'support_ticket', 'note');
+
+ 
+CREATE TABLE public.crm_customers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    company_name TEXT NOT NULL,
+    industry TEXT,
+    customer_type public.customer_type NOT NULL DEFAULT 'lead',
+    website TEXT,
+    annual_revenue NUMERIC(14, 2),
+    account_owner_id UUID REFERENCES public.employees(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+ 
+ALTER TABLE public.sales_orders 
+    ADD CONSTRAINT fk_sales_customer 
+    FOREIGN KEY (customer_id) REFERENCES public.crm_customers(id) ON DELETE RESTRICT;
+ 
+CREATE TABLE public.crm_contacts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_id UUID NOT NULL REFERENCES public.crm_customers(id) ON DELETE CASCADE,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    job_title TEXT,
+    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+ 
+CREATE TABLE public.crm_interactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_id UUID NOT NULL REFERENCES public.crm_customers(id) ON DELETE CASCADE,
+    contact_id UUID REFERENCES public.crm_contacts(id) ON DELETE SET NULL,
+    employee_id UUID REFERENCES public.employees(id) ON DELETE SET NULL,
+    interaction_type public.interaction_type NOT NULL DEFAULT 'call',
+    subject TEXT NOT NULL,
+    description TEXT,
+    interaction_date TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+ 
+CREATE INDEX idx_crm_customers_owner ON public.crm_customers(account_owner_id);
+CREATE INDEX idx_crm_contacts_customer ON public.crm_contacts(customer_id);
+CREATE INDEX idx_crm_interactions_customer ON public.crm_interactions(customer_id);
+
+ 
+ALTER TABLE public.crm_customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.crm_contacts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.crm_interactions ENABLE ROW LEVEL SECURITY;
+
+ 
+CREATE OR REPLACE FUNCTION public.is_crm_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM public.profiles 
+        WHERE id = auth.uid() 
+        AND role IN ('superadmin', 'admin', 'sales_rep', 'crm_agent')
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+ 
+CREATE POLICY "CRM customers viewable by CRM and Sales teams"
+    ON public.crm_customers FOR SELECT
+    USING (public.is_crm_admin());
+
+CREATE POLICY "CRM customers manageable by CRM and Sales teams"
+    ON public.crm_customers FOR ALL
+    USING (public.is_crm_admin());
+
+ 
+CREATE POLICY "CRM contacts viewable by CRM and Sales teams"
+    ON public.crm_contacts FOR SELECT
+    USING (public.is_crm_admin());
+
+CREATE POLICY "CRM contacts manageable by CRM and Sales teams"
+    ON public.crm_contacts FOR ALL
+    USING (public.is_crm_admin());
+
+ 
+CREATE POLICY "CRM interactions viewable by CRM and Sales teams"
+    ON public.crm_interactions FOR SELECT
+    USING (public.is_crm_admin());
+
+CREATE POLICY "CRM interactions manageable by CRM and Sales teams"
+    ON public.crm_interactions FOR ALL
+    USING (public.is_crm_admin());
